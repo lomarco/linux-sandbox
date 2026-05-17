@@ -30,6 +30,11 @@ $(BUSYBOX):
 linux: $(LINUX)
 $(LINUX):
 	;
+$(LINUX_DIR): $(LINUX_TEMP)
+	tar -xJvf $(LINUX_TEMP) -C $@
+
+$(LINUX_TEMP):
+	curl -fSLo $(LINUX_TEMP) $(LINUX_URL)
 
 $(LINUX_DIR):
 	curl -fSLo $(LINUX_TEMP) $(LINUX_URL) \
