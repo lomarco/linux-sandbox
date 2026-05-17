@@ -24,8 +24,8 @@ QEMU_OPTS := -m 512M \
 						 -kernel $(VMLINUX) \
 						 -initrd $(INITRAMFS) \
 						 -append "console=ttyS0 root=/dev/ram0 rw" \
-						 -enable-kvm
-
+						 -enable-kvm \
+						 -serial mon:stdio
 all: initramfs
 
 run: initramfs
