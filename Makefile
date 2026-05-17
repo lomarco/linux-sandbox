@@ -79,6 +79,6 @@ help:
 	'  clean       Remove build artifacts only\n' \
 	'  distclean   Remove build artifacts and cache\n' \
 	'\n' \
-	'  run   Start qemu\n'
+	'  run   Start qemu with the built kernel and initramfs'
 
 .PHONY: all help clean distclean initramfs rootfs busybox linux
