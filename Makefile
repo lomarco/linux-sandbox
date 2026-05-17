@@ -20,7 +20,7 @@ $(ROOTFS): busybox linux
 
 busybox: $(BUSYBOX)
 $(BUSYBOX):
-	;
+	curl -fSLo $@ $(BUSYBOX_URL)
 
 linux: $(LINUX)
 $(LINUX):
