@@ -5,8 +5,9 @@ INITRAMFS = $(BUILD_DIR)/initrd.img
 BUSYBOX = $(BUILD_DIR)/busybox
 BUSYBOX_URL = https://busybox.net/downloads/binaries/1.35.0-x86\_64-linux-musl/busybox
 
-LINUX = $(BUILD_DIR)/linux
+LINUX = $(BUILD_DIR)/vmlinuz
 LINUX_DIR = $(BUILD_DIR)/linux
+BZIMAGE = $(LINUX_DIR)/arch/x86/boot/bzImage
 LINUX_URL = https://www.kernel.org/pub/linux/kernel/v7.x/linux-7.0.8.tar.xz
 LINUX_TEMP = $(LINUX_DIR)-temp
 
@@ -28,8 +29,12 @@ $(BUSYBOX):
 	curl -fSLo $@ $(BUSYBOX_URL)
 
 linux: $(LINUX)
-$(LINUX): $(LINUX_DIR)
-	$(MAKE) -C $< tinyconfig && $(MAKE) -C $< -j$(shell nproc)
+$(LINUX): $(LINUX_DIR) $(BZIMAGE)
+	cp $(word 2,$^) $@
+
+$(BZIMAGE):
+	$(MAKE) -C $(LINUX_DIR) tinyconfig && \
+		$(MAKE) -C $(LINUX_DIR) -j$(shell nproc)
 
 $(LINUX_DIR): $(LINUX_TEMP)
 	mkdir $@
