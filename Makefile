@@ -26,6 +26,4 @@ linux: $(LINUX)
 $(LINUX):
 	;
 
-$(ROOTFS):
-.PHONY: all initramfs
 .PHONY: all initramfs rootfs busybox linux
