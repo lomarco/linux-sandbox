@@ -1,51 +1,83 @@
 BUILD_DIR := build
+CACHE_DIR := cache
+
 ROOTFS := $(BUILD_DIR)/rootfs
 INITRAMFS := $(BUILD_DIR)/initrd.img
 
-BUSYBOX := $(BUILD_DIR)/busybox
-BUSYBOX_URL := https://busybox.net/downloads/binaries/1.35.0-x86\_64-linux-musl/busybox
+BUSYBOX := $(CACHE_DIR)/busybox
+BUSYBOX_URL := https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox
 
-LINUX := $(BUILD_DIR)/vmlinuz
-LINUX_DIR := $(BUILD_DIR)/linux
-BZIMAGE := $(LINUX_DIR)/arch/x86/boot/bzImage
+LINUX_TARBALL := $(CACHE_DIR)/linux.tar.xz
 LINUX_URL := https://www.kernel.org/pub/linux/kernel/v7.x/linux-7.0.8.tar.xz
-LINUX_TEMP := $(LINUX_DIR)-temp
+
+LINUX_DIR := $(BUILD_DIR)/linux
+LINUX_UNPACK_STAMP := $(LINUX_DIR)/.unpacked
+BZIMAGE := $(LINUX_DIR)/arch/x86/boot/bzImage
+VMLINUX := $(BUILD_DIR)/vmlinuz
+
+BUSYBOX_INSTALL := $(ROOTFS)/.busybox-installed
+ROOTFS_INIT := $(ROOTFS)/.prepared
 
 all: initramfs
 
-initramfs: $(INITRAMFS)
-$(INITRAMFS): $(BUILD_DIR) rootfs
-	;
-
-$(BUILD_DIR):
-	mkdir $@
-
-rootfs: $(ROOTFS)
-$(ROOTFS): busybox linux
-	;
+$(BUILD_DIR) $(CACHE_DIR):
+	mkdir -p $@
 
 busybox: $(BUSYBOX)
-$(BUSYBOX):
+
+$(BUSYBOX): | $(CACHE_DIR)
 	curl -fSLo $@ $(BUSYBOX_URL)
+	chmod +x $@
 
-linux: $(LINUX)
-$(LINUX): $(LINUX_DIR) $(BZIMAGE)
-	cp $(word 2,$^) $@
+linux: $(VMLINUX)
 
-$(BZIMAGE):
-	$(MAKE) -C $(LINUX_DIR) tinyconfig && \
-		$(MAKE) -C $(LINUX_DIR) -j$(shell nproc)
+$(VMLINUX): $(BZIMAGE)
+	cp $< $@
 
-$(LINUX_DIR): $(LINUX_TEMP)
-	mkdir $@
-	tar -xJvf $(LINUX_TEMP) -C $@ --strip-components=1
+$(LINUX_UNPACK_STAMP): $(LINUX_TARBALL) | $(BUILD_DIR)
+	rm -rf $(LINUX_DIR)
+	mkdir -p $(LINUX_DIR)
+	tar -xJf $< -C $(LINUX_DIR) --strip-components=1
+	touch $@
 
-$(LINUX_TEMP):
-	curl -fSLo $(LINUX_TEMP) $(LINUX_URL)
+$(LINUX_TARBALL): | $(CACHE_DIR)
+	curl -fSLo $@ $(LINUX_URL)
 
-$(LINUX_DIR):
-	curl -fSLo $(LINUX_TEMP) $(LINUX_URL) \
-	tar -xjvf $(LINUX_TEMP) -C $@ \
-	rm -rf $(LINUX_TEMP)
+$(BZIMAGE): $(LINUX_UNPACK_STAMP)
+	$(MAKE) -C $(LINUX_DIR) tinyconfig
+	$(MAKE) -C $(LINUX_DIR) -j$$(nproc)
 
-.PHONY: all initramfs rootfs busybox linux
+rootfs: $(ROOTFS_INIT)
+
+$(ROOTFS_INIT): $(BUSYBOX) | $(BUILD_DIR)
+	rm -rf $(ROOTFS)
+	mkdir -p $(ROOTFS)/bin
+	cp $(BUSYBOX) $(ROOTFS)/bin/busybox
+	ln -sf /bin/busybox $(ROOTFS)/bin/sh
+	touch $@
+
+initramfs: $(INITRAMFS)
+
+$(INITRAMFS): rootfs linux | $(BUILD_DIR)
+	@touch $@
+
+clean:
+	rm -rf $(BUILD_DIR)
+
+distclean: clean
+	rm -rf $(CACHE_DIR)
+
+help:
+	@printf '%s\n' \
+	'Usage: make [target]' \
+	'' \
+	'Targets:' \
+	'  all         Build initramfs (default)' \
+	'  initramfs   Build initramfs image' \
+	'  rootfs      Prepare rootfs' \
+	'  busybox     Download BusyBox to cache' \
+	'  linux       Build Linux kernel and copy vmlinuz' \
+	'  clean       Remove build artifacts only' \
+	'  distclean   Remove build artifacts and cache'
+
+.PHONY: all help clean distclean initramfs rootfs busybox linux
