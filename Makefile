@@ -68,16 +68,17 @@ distclean: clean
 	rm -rf $(CACHE_DIR)
 
 help:
-	@printf '%s\n' \
-	'Usage: make [target]' \
-	'' \
-	'Targets:' \
-	'  all         Build initramfs (default)' \
-	'  initramfs   Build initramfs image' \
-	'  rootfs      Prepare rootfs' \
-	'  busybox     Download BusyBox to cache' \
-	'  linux       Build Linux kernel and copy vmlinuz' \
-	'  clean       Remove build artifacts only' \
-	'  distclean   Remove build artifacts and cache'
+	@echo -e 'Usage: make [target]' \
+	'\n' \
+	'Targets:\n' \
+	'  all         Build initramfs (default)\n' \
+	'  initramfs   Build initramfs image\n' \
+	'  rootfs      Prepare rootfs\n' \
+	'  busybox     Download BusyBox to cache\n' \
+	'  linux       Build Linux kernel and copy vmlinuz\n' \
+	'  clean       Remove build artifacts only\n' \
+	'  distclean   Remove build artifacts and cache\n' \
+	'\n' \
+	'  run   Start qemu\n'
 
 .PHONY: all help clean distclean initramfs rootfs busybox linux
