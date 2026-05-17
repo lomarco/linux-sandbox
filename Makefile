@@ -13,7 +13,7 @@ LINUX_TEMP = $(LINUX_DIR)-temp
 all: initramfs
 
 initramfs: $(INITRAMFS)
-$(INITRAMFS): $(ROOTFS)
+$(INITRAMFS): rootfs
 	;
 
 rootfs: $(ROOTFS)
