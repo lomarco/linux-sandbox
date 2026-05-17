@@ -13,8 +13,11 @@ LINUX_TEMP = $(LINUX_DIR)-temp
 all: initramfs
 
 initramfs: $(INITRAMFS)
-$(INITRAMFS): rootfs
+$(INITRAMFS): $(BUILD_DIR) rootfs
 	;
+
+$(BUILD_DIR):
+	mkdir $@
 
 rootfs: $(ROOTFS)
 $(ROOTFS): busybox linux
