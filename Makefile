@@ -28,8 +28,9 @@ $(BUSYBOX):
 	curl -fSLo $@ $(BUSYBOX_URL)
 
 linux: $(LINUX)
-$(LINUX):
-	;
+$(LINUX): $(LINUX_DIR)
+	$(MAKE) -C $< tinyconfig && $(MAKE) -C $< -j$(shell nproc)
+
 $(LINUX_DIR): $(LINUX_TEMP)
 	mkdir $@
 	tar -xJvf $(LINUX_TEMP) -C $@ --strip-components=1
