@@ -6,7 +6,9 @@ BUSYBOX = $(BUILD_DIR)/busybox
 BUSYBOX_URL = https://busybox.net/downloads/binaries/1.35.0-x86\_64-linux-musl/busybox
 
 LINUX = $(BUILD_DIR)/linux
+LINUX_DIR = $(BUILD_DIR)/linux
 LINUX_URL = https://www.kernel.org/pub/linux/kernel/v7.x/linux-7.0.8.tar.xz
+LINUX_TEMP = $(LINUX_DIR)-temp
 
 all: initramfs
 
@@ -25,5 +27,10 @@ $(BUSYBOX):
 linux: $(LINUX)
 $(LINUX):
 	;
+
+$(LINUX_DIR):
+	curl -fSLo $(LINUX_TEMP) $(LINUX_URL) \
+	tar -xjvf $(LINUX_TEMP) -C $@ \
+	rm -rf $(LINUX_TEMP)
 
 .PHONY: all initramfs rootfs busybox linux
