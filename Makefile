@@ -20,7 +20,6 @@ ROOTFS_INIT := $(ROOTFS)/.prepared
 
 QEMU := qemu-system-x86_64
 QEMU_OPTS := -m 512M \
-						 -nographic \
 						 -initrd $(INITRAMFS) \
 						 -kernel $(VMLINUX) \
 						 -append "console=ttyS0 root=/dev/ram0 rw" \
