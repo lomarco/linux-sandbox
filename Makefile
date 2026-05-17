@@ -18,7 +18,18 @@ VMLINUX := $(BUILD_DIR)/vmlinuz
 BUSYBOX_INSTALL := $(ROOTFS)/.busybox-installed
 ROOTFS_INIT := $(ROOTFS)/.prepared
 
+QEMU := qemu-system-x86_64
+QEMU_OPTS := -m 512M \
+						 -nographic \
+						 -kernel $(VMLINUX) \
+						 -initrd $(INITRAMFS) \
+						 -append "console=ttyS0 root=/dev/ram0 rw" \
+						 -enable-kvm
+
 all: initramfs
+
+run: initramfs
+	$(QEMU) $(QEMU_OPTS)
 
 $(BUILD_DIR) $(CACHE_DIR):
 	mkdir -p $@
