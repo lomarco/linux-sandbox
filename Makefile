@@ -31,7 +31,8 @@ linux: $(LINUX)
 $(LINUX):
 	;
 $(LINUX_DIR): $(LINUX_TEMP)
-	tar -xJvf $(LINUX_TEMP) -C $@
+	mkdir $@
+	tar -xJvf $(LINUX_TEMP) -C $@ --strip-components=1
 
 $(LINUX_TEMP):
 	curl -fSLo $(LINUX_TEMP) $(LINUX_URL)
