@@ -27,6 +27,8 @@ QEMU_OPTS := -m 512M \
 						 -serial mon:stdio
 all: initramfs
 
+rebuild: clean all
+
 run: initramfs
 	$(QEMU) $(QEMU_OPTS)
 
