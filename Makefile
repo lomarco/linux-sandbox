@@ -55,7 +55,7 @@ $(LINUX_TARBALL): | $(CACHE_DIR)
 
 $(BZIMAGE): $(LINUX_UNPACK_STAMP)
 	$(MAKE) -C $(LINUX_DIR) tinyconfig
-	$(MAKE) -C $(LINUX_DIR) -j$$(nproc)
+	$(MAKE) -C $(LINUX_DIR) -j$$(nproc) 2>&1 | tee build-kernel.log
 
 rootfs: $(ROOTFS_INIT)
 
