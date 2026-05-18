@@ -1,5 +1,6 @@
 BUILD_DIR := $(abspath build)
 CACHE_DIR := $(abspath cache)
+OVERLAYFS := $(abspath overlayfs)
 
 ROOTFS := $(BUILD_DIR)/rootfs
 INITRAMFS := $(BUILD_DIR)/initrd.img
@@ -22,9 +23,10 @@ QEMU := qemu-system-x86_64
 QEMU_OPTS := -m 512M \
 						 -initrd $(INITRAMFS) \
 						 -kernel $(VMLINUX) \
-						 -append "console=ttyS0 rw" \
+						 -append "console=ttyS0 console=tty1" \
 						 -enable-kvm \
 						 -serial mon:stdio
+
 all: initramfs
 
 rebuild: clean all
@@ -78,23 +80,23 @@ $(BZIMAGE): $(LINUX_UNPACK_STAMP)
 	$(MAKE) -C $(LINUX_DIR) tinyconfig
 	$(MAKE) -C $(LINUX_DIR) -j$$(nproc) 2>&1 | tee build-kernel.log
 
+$(ROOTFS)/$(OVERLAYFS):
+	cp -r $(OVERLAYFS)/* $(ROOTFS)
+
 rootfs: $(ROOTFS_INIT)
 
 $(ROOTFS_INIT): $(BUSYBOX) | $(BUILD_DIR)
 	rm -rf $(ROOTFS)
 	mkdir -p $(ROOTFS)/bin $(ROOTFS)/etc $(ROOTFS)/proc $(ROOTFS)/sys $(ROOTFS)/dev $(ROOTFS)/tmp $(ROOTFS)/mnt $(ROOTFS)/root
-	cp $(BUSYBOX) $(ROOTFS)/bin/busybox
-	ln -sf /bin/busybox $(ROOTFS)/bin/sh
-	echo -e "#!/bin/sh\n" \
-	"export PATH='/bin'\n" \
-	"exec /bin/sh\n"> $(ROOTFS)/init
-	chmod +x $(ROOTFS)/init
+	$(BUSYBOX) --install $(ROOTFS)/bin
+	ln -sf /bin/init $(ROOTFS)/init
+	$(MAKE) $(ROOTFS)/$(OVERLAYFS)
 	touch $@
 
 initramfs: $(INITRAMFS)
 
 $(INITRAMFS): rootfs linux | $(BUILD_DIR)
-	cd $(ROOTFS) && find . -print0 | LC_ALL=C sort -z | cpio --null -o --format=newc --owner=root:root > "$(INITRAMFS)"
+	cd $(ROOTFS) && find . -print0 | LC_ALL=C sort -z | cpio --null -o --format=newc --owner=root:root > "$@"
 
 clean:
 	rm -rf $(BUILD_DIR)
