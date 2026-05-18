@@ -26,6 +26,7 @@ QEMU_OPTS := -m 512M \
 						 -append "console=ttyS0 console=tty1" \
 						 -enable-kvm \
 						 -serial mon:stdio
+
 all: initramfs
 
 rebuild: clean all
