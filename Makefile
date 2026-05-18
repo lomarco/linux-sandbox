@@ -28,6 +28,8 @@ QEMU_OPTS := -m 512M \
 						 -serial mon:stdio
 all: initramfs
 
+rebuild: clean all
+
 run: initramfs
 	$(QEMU) $(QEMU_OPTS)
 
@@ -56,7 +58,7 @@ $(LINUX_TARBALL): | $(CACHE_DIR)
 
 $(BZIMAGE): $(LINUX_UNPACK_STAMP)
 	$(MAKE) -C $(LINUX_DIR) tinyconfig
-	$(MAKE) -C $(LINUX_DIR) -j$$(nproc)
+	$(MAKE) -C $(LINUX_DIR) -j$$(nproc) 2>&1 | tee build-kernel.log
 
 $(ROOTFS)/$(OVERLAYFS):
 	cp -r $(OVERLAYFS)/* $(ROOTFS)
