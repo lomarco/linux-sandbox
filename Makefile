@@ -41,7 +41,26 @@ $(BUSYBOX): | $(CACHE_DIR)
 	curl -fSLo $@ $(BUSYBOX_URL)
 	chmod +x $@
 
+busybox-reinstall: | $(CACHE_DIR)
+	curl -fSLo $(BUSYBOX) $(BUSYBOX_URL)
+	chmod +x $(BUSYBOX)
+	rm -f $(BUSYBOX_INSTALL)
+
 linux: $(VMLINUX)
+
+linux-reinstall: | $(CACHE_DIR)
+	curl -fSLo $(LINUX_TARBALL) $(LINUX_URL)
+	rm -rf $(LINUX_DIR)
+	mkdir -p $(LINUX_DIR)
+	tar -xJf $(LINUX_TARBALL) -C $(LINUX_DIR) --strip-components=1
+	$(MAKE) -C $(LINUX_DIR) tinyconfig
+	$(MAKE) -C $(LINUX_DIR) -j$$(nproc) 2>&1 | tee build-kernel.log
+	cp $(BZIMAGE) $(VMLINUX)
+	touch $(LINUX_UNPACK_STAMP)
+
+linux-rebuild: $(LINUX_UNPACK_STAMP)
+	$(MAKE) -C $(LINUX_DIR) -j$$(nproc) 2>&1 | tee build-kernel.log
+	cp $(BZIMAGE) $(VMLINUX)
 
 $(VMLINUX): $(BZIMAGE)
 	cp $< $@
@@ -87,14 +106,17 @@ help:
 	@echo -e 'Usage: make [target]' \
 	'\n' \
 	'Targets:\n' \
-	'  all         Build initramfs (default)\n' \
-	'  initramfs   Build initramfs image\n' \
-	'  rootfs      Prepare rootfs\n' \
-	'  busybox     Download BusyBox to cache\n' \
-	'  linux       Build Linux kernel and copy vmlinuz\n' \
-	'  clean       Remove build artifacts only\n' \
-	'  distclean   Remove build artifacts and cache\n' \
+	'  all               Build initramfs (default)\n' \
+	'  initramfs         Build initramfs image\n' \
+	'  rootfs            Prepare rootfs\n' \
+	'  busybox           Download BusyBox to cache\n' \
+	'  busybox-reinstall Redownload BusyBox and overwrite existing file\n' \
+	'  linux             Build Linux kernel and copy vmlinuz\n' \
+	'  linux-reinstall   Redownload, unpack, and rebuild Linux from scratch\n' \
+	'  linux-rebuild     Rebuild Linux in existing unpacked tree\n' \
+	'  clean             Remove build artifacts only\n' \
+	'  distclean         Remove build artifacts and cache\n' \
 	'\n' \
-	'  run   Start qemu with the built kernel and initramfs'
+	'  run               Start qemu with the built kernel and initramfs'
 
-.PHONY: all help clean distclean initramfs rootfs busybox linux
+.PHONY: all help clean distclean initramfs rootfs busybox busybox-reinstall linux linux-reinstall linux-rebuild run
