@@ -1,5 +1,6 @@
 BUILD_DIR := $(abspath build)
 CACHE_DIR := $(abspath cache)
+OVERLAYFS := $(abspath overlayfs)
 
 ROOTFS := $(BUILD_DIR)/rootfs
 INITRAMFS := $(BUILD_DIR)/initrd.img
@@ -57,6 +58,9 @@ $(BZIMAGE): $(LINUX_UNPACK_STAMP)
 	$(MAKE) -C $(LINUX_DIR) tinyconfig
 	$(MAKE) -C $(LINUX_DIR) -j$$(nproc)
 
+$(ROOTFS)/$(OVERLAYFS):
+	cp -r $(OVERLAYFS)/* $(ROOTFS)
+
 rootfs: $(ROOTFS_INIT)
 
 $(ROOTFS_INIT): $(BUSYBOX) | $(BUILD_DIR)
@@ -67,6 +71,7 @@ $(ROOTFS_INIT): $(BUSYBOX) | $(BUILD_DIR)
 	"export PATH='/bin'\n" \
 	"exec /bin/sh\n"> $(ROOTFS)/init
 	chmod +x $(ROOTFS)/init
+	$(MAKE) $(ROOTFS)/$(OVERLAYFS)
 	touch $@
 
 initramfs: $(INITRAMFS)
