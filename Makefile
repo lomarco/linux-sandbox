@@ -95,7 +95,7 @@ $(ROOTFS_INIT): $(BUSYBOX) | $(BUILD_DIR)
 initramfs: $(INITRAMFS)
 
 $(INITRAMFS): rootfs linux | $(BUILD_DIR)
-	cd $(ROOTFS) && find . -print0 | LC_ALL=C sort -z | cpio --null -o --format=newc --owner=root:root > "$(INITRAMFS)"
+	cd $(ROOTFS) && find . -print0 | LC_ALL=C sort -z | cpio --null -o --format=newc --owner=root:root > "$@"
 
 clean:
 	rm -rf $(BUILD_DIR)
