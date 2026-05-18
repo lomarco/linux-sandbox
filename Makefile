@@ -22,7 +22,7 @@ QEMU := qemu-system-x86_64
 QEMU_OPTS := -m 512M \
 						 -initrd $(INITRAMFS) \
 						 -kernel $(VMLINUX) \
-						 -append "console=ttyS0 root=/dev/ram0 rw" \
+						 -append "console=ttyS0 rw" \
 						 -enable-kvm \
 						 -serial mon:stdio
 all: initramfs
@@ -64,6 +64,10 @@ $(ROOTFS_INIT): $(BUSYBOX) | $(BUILD_DIR)
 	mkdir -p $(ROOTFS)/bin $(ROOTFS)/etc $(ROOTFS)/proc $(ROOTFS)/sys $(ROOTFS)/dev $(ROOTFS)/tmp $(ROOTFS)/mnt $(ROOTFS)/root
 	cp $(BUSYBOX) $(ROOTFS)/bin/busybox
 	ln -sf /bin/busybox $(ROOTFS)/bin/sh
+	echo -e "#!/bin/sh\n" \
+	"export PATH='/bin'\n" \
+	"exec /bin/sh\n"> $(ROOTFS)/init
+	chmod +x $(ROOTFS)/init
 	touch $@
 
 initramfs: $(INITRAMFS)
