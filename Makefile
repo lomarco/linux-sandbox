@@ -62,8 +62,7 @@ rootfs: $(ROOTFS_INIT)
 $(ROOTFS_INIT): $(BUSYBOX) | $(BUILD_DIR)
 	rm -rf $(ROOTFS)
 	mkdir -p $(ROOTFS)/bin $(ROOTFS)/etc $(ROOTFS)/proc $(ROOTFS)/sys $(ROOTFS)/dev $(ROOTFS)/tmp $(ROOTFS)/mnt $(ROOTFS)/root
-	cp $(BUSYBOX) $(ROOTFS)/bin/busybox
-	ln -sf /bin/busybox $(ROOTFS)/bin/sh
+	$(BUSYBOX) --install $(ROOTFS)/bin
 	echo -e "#!/bin/sh\n" \
 	"export PATH='/bin'\n" \
 	"exec /bin/sh\n"> $(ROOTFS)/init
