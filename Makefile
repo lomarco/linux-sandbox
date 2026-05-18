@@ -1,5 +1,5 @@
-BUILD_DIR := build
-CACHE_DIR := cache
+BUILD_DIR := $(abspath build)
+CACHE_DIR := $(abspath cache)
 
 ROOTFS := $(BUILD_DIR)/rootfs
 INITRAMFS := $(BUILD_DIR)/initrd.img
@@ -69,7 +69,7 @@ $(ROOTFS_INIT): $(BUSYBOX) | $(BUILD_DIR)
 initramfs: $(INITRAMFS)
 
 $(INITRAMFS): rootfs linux | $(BUILD_DIR)
-	find $(ROOTFS) -print0 | LC_ALL=C sort -z | cpio -0o --format=newc | gzip -9 > $(INITRAMFS)
+	cd $(ROOTFS) && find . -print0 | LC_ALL=C sort -z | cpio --null -o --format=newc --owner=root:root > "$(INITRAMFS)"
 
 clean:
 	rm -rf $(BUILD_DIR)
