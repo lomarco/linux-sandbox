@@ -1,5 +1,5 @@
-BUILD_DIR := build
-CACHE_DIR := cache
+BUILD_DIR := $(abspath build)
+CACHE_DIR := $(abspath cache)
 
 ROOTFS := $(BUILD_DIR)/rootfs
 INITRAMFS := $(BUILD_DIR)/initrd.img
@@ -18,7 +18,17 @@ VMLINUX := $(BUILD_DIR)/vmlinuz
 BUSYBOX_INSTALL := $(ROOTFS)/.busybox-installed
 ROOTFS_INIT := $(ROOTFS)/.prepared
 
+QEMU := qemu-system-x86_64
+QEMU_OPTS := -m 512M \
+						 -initrd $(INITRAMFS) \
+						 -kernel $(VMLINUX) \
+						 -append "console=ttyS0 rw" \
+						 -enable-kvm \
+						 -serial mon:stdio
 all: initramfs
+
+run: initramfs
+	$(QEMU) $(QEMU_OPTS)
 
 $(BUILD_DIR) $(CACHE_DIR):
 	mkdir -p $@
@@ -51,15 +61,19 @@ rootfs: $(ROOTFS_INIT)
 
 $(ROOTFS_INIT): $(BUSYBOX) | $(BUILD_DIR)
 	rm -rf $(ROOTFS)
-	mkdir -p $(ROOTFS)/bin
+	mkdir -p $(ROOTFS)/bin $(ROOTFS)/etc $(ROOTFS)/proc $(ROOTFS)/sys $(ROOTFS)/dev $(ROOTFS)/tmp $(ROOTFS)/mnt $(ROOTFS)/root
 	cp $(BUSYBOX) $(ROOTFS)/bin/busybox
 	ln -sf /bin/busybox $(ROOTFS)/bin/sh
+	echo -e "#!/bin/sh\n" \
+	"export PATH='/bin'\n" \
+	"exec /bin/sh\n"> $(ROOTFS)/init
+	chmod +x $(ROOTFS)/init
 	touch $@
 
 initramfs: $(INITRAMFS)
 
 $(INITRAMFS): rootfs linux | $(BUILD_DIR)
-	find $(ROOTFS) -print0 | LC_ALL=C sort -z | cpio -0o --format=newc | gzip -9 > $(INITRAMFS)
+	cd $(ROOTFS) && find . -print0 | LC_ALL=C sort -z | cpio --null -o --format=newc --owner=root:root > "$(INITRAMFS)"
 
 clean:
 	rm -rf $(BUILD_DIR)
