@@ -67,10 +67,6 @@ $(ROOTFS_INIT): $(BUSYBOX) | $(BUILD_DIR)
 	rm -rf $(ROOTFS)
 	mkdir -p $(ROOTFS)/bin $(ROOTFS)/etc $(ROOTFS)/proc $(ROOTFS)/sys $(ROOTFS)/dev $(ROOTFS)/tmp $(ROOTFS)/mnt $(ROOTFS)/root
 	$(BUSYBOX) --install $(ROOTFS)/bin
-	echo -e "#!/bin/sh\n" \
-	"export PATH='/bin'\n" \
-	"exec /bin/sh\n"> $(ROOTFS)/init
-	chmod +x $(ROOTFS)/init
 	$(MAKE) $(ROOTFS)/$(OVERLAYFS)
 	touch $@
 
