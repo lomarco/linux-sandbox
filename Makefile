@@ -23,7 +23,7 @@ QEMU := qemu-system-x86_64
 QEMU_OPTS := -m 512M \
 						 -initrd $(INITRAMFS) \
 						 -kernel $(VMLINUX) \
-						 -append "console=ttyS0 console=tty1" \
+						 -append "console=ttyS0" \
 						 -enable-kvm \
 						 -serial mon:stdio
 
