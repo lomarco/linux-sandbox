@@ -1,11 +1,10 @@
 #!/bin/sh
-mount -t proc proc /proc
-mount -t sysfs sysfs /sys
-mount -t devtmpfs devtmpfs /dev 
-ip link set lo up || true
 
-getty 0 tty1 &
-getty 0 tty2 &
-getty 0 tty3 &
+set -e
 
-exec setsid /bin/sh </dev/tty2 >/dev/tty2 2>&1
+mount -t proc proc /proc 2>/dev/null || true
+mount -t sysfs sysfs /sys 2>/dev/null || true
+mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
+mount -t tmpfs tmpfs /run 2>/dev/null || true
+
+while true; do /bin/sh </dev/tty1 >/dev/tty1 2>&1; done
