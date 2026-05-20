@@ -5,7 +5,7 @@ CACHE_DIR  := $(abspath cache)
 OVERLAYFS  := $(abspath overlayfs)
 
 ROOTFS     := $(BUILD_DIR)/rootfs
-INITRAMFS  := $(BUILD_DIR)/initrd.img
+INITRD  := $(BUILD_DIR)/initrd.img
 
 BUSYBOX     := $(CACHE_DIR)/busybox
 BUSYBOX_URL := https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox
@@ -19,7 +19,7 @@ BZIMAGE      := $(LINUX_DIR)/arch/x86/boot/bzImage
 
 QEMU := qemu-system-x86_64
 QEMU_OPTS := -m 512M \
-						 -initrd $(INITRAMFS) \
+						 -initrd $(INITRD) \
 						 -kernel $(BZIMAGE) \
 						 -append "console=ttyS0" \
 						 -enable-kvm \
@@ -27,7 +27,7 @@ QEMU_OPTS := -m 512M \
 
 JOBS ?= $(shell nproc)
 
-all: initramfs
+all: initrd
 
 rebuild: clean all
 
@@ -85,12 +85,12 @@ $(ROOTFS): $(BUSYBOX) | $(BUILD_DIR)
 
 rootfs: $(ROOTFS)
 
-$(INITRAMFS): $(ROOTFS) $(BZIMAGE) | $(BUILD_DIR)
+$(INITRD): $(ROOTFS) $(BZIMAGE) | $(BUILD_DIR)
 	cd $(ROOTFS) && \
 		find . -print0 | LC_ALL=C sort -z | \
 		cpio --null -o --format=newc --owner=root:root > $@
 
-initramfs: $(INITRAMFS)
+initrd: $(INITRD)
 
 clean:
 	rm -rf $(BUILD_DIR)
@@ -103,8 +103,8 @@ help:
 	'Usage: make [target]' \
 	'' \
 	'Targets:' \
-	'  all               Build initramfs (default)' \
-	'  initramfs         Build initramfs image' \
+	'  all               Build initrd (default)' \
+	'  initrd            Build initrd image' \
 	'  rootfs            Prepare rootfs' \
 	'  busybox           Download BusyBox to cache' \
 	'  busybox-reinstall Redownload BusyBox' \
@@ -115,4 +115,4 @@ help:
 	'  clean             Remove build artifacts' \
 	'  distclean         Remove build artifacts and cache'
 
-.PHONY: all run help clean distclean rebuild busybox busybox-reinstall linux linux-reinstall linux-rebuild rootfs initramfs
+.PHONY: all run help clean distclean rebuild busybox busybox-reinstall linux linux-reinstall linux-rebuild rootfs initrd
