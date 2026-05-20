@@ -83,7 +83,7 @@ rootfs: $(ROOTFS_INIT)
 
 $(ROOTFS_INIT): $(BUSYBOX) | $(BUILD_DIR)
 	rm -rf $(ROOTFS)
-	mkdir -p $(ROOTFS)/bin $(ROOTFS)/etc $(ROOTFS)/proc $(ROOTFS)/sys $(ROOTFS)/dev $(ROOTFS)/tmp $(ROOTFS)/mnt $(ROOTFS)/root
+	mkdir -p $(ROOTFS)/{bin,etc,proc,sys,dev,tmp,mnt,root}
 	$(BUSYBOX) --install $(ROOTFS)/bin
 	ln -sf /bin/init $(ROOTFS)/init
 	$(MAKE) $(ROOTFS)/$(OVERLAYFS)
