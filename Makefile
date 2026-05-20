@@ -14,7 +14,6 @@ LINUX_URL := https://www.kernel.org/pub/linux/kernel/v7.x/linux-7.0.8.tar.xz
 LINUX_DIR := $(BUILD_DIR)/linux
 LINUX_UNPACK_STAMP := $(LINUX_DIR)/.unpacked
 BZIMAGE := $(LINUX_DIR)/arch/x86/boot/bzImage
-VMLINUX := $(BUILD_DIR)/vmlinuz
 
 BUSYBOX_INSTALL := $(ROOTFS)/.busybox-installed
 ROOTFS_INIT := $(ROOTFS)/.prepared
@@ -22,7 +21,7 @@ ROOTFS_INIT := $(ROOTFS)/.prepared
 QEMU := qemu-system-x86_64
 QEMU_OPTS := -m 512M \
 						 -initrd $(INITRAMFS) \
-						 -kernel $(VMLINUX) \
+						 -kernel $(BZIMAGE) \
 						 -append "console=ttyS0" \
 						 -enable-kvm \
 						 -serial mon:stdio
@@ -48,7 +47,7 @@ busybox-reinstall: | $(CACHE_DIR)
 	chmod +x $(BUSYBOX)
 	rm -f $(BUSYBOX_INSTALL)
 
-linux: $(VMLINUX)
+linux: $(BZIMAGE)
 
 linux-reinstall: | $(CACHE_DIR)
 	curl -fSLo $(LINUX_TARBALL) $(LINUX_URL)
@@ -57,15 +56,10 @@ linux-reinstall: | $(CACHE_DIR)
 	tar -xJf $(LINUX_TARBALL) -C $(LINUX_DIR) --strip-components=1
 	$(MAKE) -C $(LINUX_DIR) tinyconfig
 	$(MAKE) -C $(LINUX_DIR) -j$$(nproc) 2>&1 | tee build-kernel.log
-	cp $(BZIMAGE) $(VMLINUX)
 	touch $(LINUX_UNPACK_STAMP)
 
 linux-rebuild: $(LINUX_UNPACK_STAMP)
 	$(MAKE) -C $(LINUX_DIR) -j$$(nproc) 2>&1 | tee build-kernel.log
-	cp $(BZIMAGE) $(VMLINUX)
-
-$(VMLINUX): $(BZIMAGE)
-	cp $< $@
 
 $(LINUX_UNPACK_STAMP): $(LINUX_TARBALL) | $(BUILD_DIR)
 	rm -rf $(LINUX_DIR)
