@@ -95,7 +95,7 @@ initrd: $(INITRD)
 clean:
 	rm -rf $(BUILD_DIR)
 
-distclean: clean
+cleandist: clean
 	rm -rf $(CACHE_DIR)
 
 help:
@@ -113,6 +113,6 @@ help:
 	'  linux-rebuild     Rebuild Linux in existing tree' \
 	'  run               Boot QEMU' \
 	'  clean             Remove build artifacts' \
-	'  distclean         Remove build artifacts and cache'
+	'  cleandist         Remove build artifacts and cache'
 
-.PHONY: all run help clean distclean rebuild busybox busybox-reinstall linux linux-reinstall linux-rebuild rootfs initrd
+.PHONY: all run help clean cleandist rebuild busybox busybox-reinstall linux linux-reinstall linux-rebuild rootfs initrd
