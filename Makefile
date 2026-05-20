@@ -99,20 +99,20 @@ distclean: clean
 	rm -rf $(CACHE_DIR)
 
 help:
-	@echo -e 'Usage: make [target]' \
-	'\n' \
-	'Targets:\n' \
-	'  all               Build initramfs (default)\n' \
-	'  initramfs         Build initramfs image\n' \
-	'  rootfs            Prepare rootfs\n' \
-	'  busybox           Download BusyBox to cache\n' \
-	'  busybox-reinstall Redownload BusyBox and overwrite existing file\n' \
-	'  linux             Build Linux kernel and copy vmlinuz\n' \
-	'  linux-reinstall   Redownload, unpack, and rebuild Linux from scratch\n' \
-	'  linux-rebuild     Rebuild Linux in existing unpacked tree\n' \
-	'  clean             Remove build artifacts only\n' \
-	'  distclean         Remove build artifacts and cache\n' \
-	'\n' \
-	'  run               Start qemu with the built kernel and initramfs'
+	@printf '%s\n' \
+	'Usage: make [target]' \
+	'' \
+	'Targets:' \
+	'  all               Build initramfs (default)' \
+	'  initramfs         Build initramfs image' \
+	'  rootfs            Prepare rootfs' \
+	'  busybox           Download BusyBox to cache' \
+	'  busybox-reinstall Redownload BusyBox' \
+	'  linux             Build Linux kernel' \
+	'  linux-reinstall   Redownload and rebuild Linux from scratch' \
+	'  linux-rebuild     Rebuild Linux in existing tree' \
+	'  run               Boot QEMU' \
+	'  clean             Remove build artifacts' \
+	'  distclean         Remove build artifacts and cache'
 
 .PHONY: all run help clean distclean rebuild busybox busybox-reinstall linux linux-reinstall linux-rebuild rootfs initramfs
