@@ -106,8 +106,7 @@ $(INITRAMFS): $(ROOTFS_STAMP) $(BZIMAGE) | $(BUILD_DIR)
 		find . -print0 | LC_ALL=C sort -z | \
 		cpio --null -o --format=newc --owner=root:root > $@
 
-$(INITRAMFS): rootfs linux | $(BUILD_DIR)
-	cd $(ROOTFS) && find . -print0 | LC_ALL=C sort -z | cpio --null -o --format=newc --owner=root:root > "$@"
+initramfs: $(INITRAMFS)
 
 clean:
 	rm -rf $(BUILD_DIR)
