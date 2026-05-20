@@ -74,7 +74,6 @@ linux-rebuild: $(LINUX_DIR)
 linux-reinstall: | $(CACHE_DIR)
 	curl -fL --retry 3 --retry-delay 1 -o $(LINUX_TARBALL) $(LINUX_URL)
 	rm -rf $(LINUX_DIR)
-	$(MAKE) $(BZIMAGE)
 
 $(ROOTFS): $(BUSYBOX) | $(BUILD_DIR)
 	rm -rf $@
