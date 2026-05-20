@@ -38,11 +38,11 @@ run: initramfs
 $(BUILD_DIR) $(CACHE_DIR):
 	mkdir -p $@
 
-busybox: $(BUSYBOX)
-
 $(BUSYBOX): | $(CACHE_DIR)
 	curl -fSLo $@ $(BUSYBOX_URL)
 	chmod +x $@
+
+busybox: $(BUSYBOX)
 
 busybox-reinstall: | $(CACHE_DIR)
 	curl -fSLo $(BUSYBOX) $(BUSYBOX_URL)
