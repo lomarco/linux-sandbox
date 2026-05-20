@@ -88,7 +88,8 @@ rootfs: $(ROOTFS)
 $(INITRD): $(ROOTFS) $(BZIMAGE) | $(BUILD_DIR)
 	cd $(ROOTFS) && \
 		find . -print0 | LC_ALL=C sort -z | \
-		cpio --null -o --format=newc --owner=root:root > $@
+		cpio --null -o --format=newc --owner=root:root | \
+		gzip -9 -n > $@
 
 initrd: $(INITRD)
 
