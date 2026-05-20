@@ -86,7 +86,7 @@ $(ROOTFS_INIT): $(BUSYBOX) | $(BUILD_DIR)
 	mkdir -p $(ROOTFS)/{bin,etc,proc,sys,dev,tmp,mnt,root}
 	$(BUSYBOX) --install $(ROOTFS)/bin
 	ln -sf /bin/init $(ROOTFS)/init
-	$(MAKE) $(ROOTFS)/$(OVERLAYFS)
+	if [ -d $(OVERLAYFS) ]; then cp -a $(OVERLAYFS)/. $(ROOTFS)/; fi
 	touch $@
 
 initramfs: $(INITRAMFS)
