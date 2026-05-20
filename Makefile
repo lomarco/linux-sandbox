@@ -4,8 +4,8 @@ BUILD_DIR  := $(abspath build)
 CACHE_DIR  := $(abspath cache)
 OVERLAYFS  := $(abspath overlayfs)
 
-ROOTFS      := $(BUILD_DIR)/rootfs
-INITRAMFS   := $(BUILD_DIR)/initrd.img
+ROOTFS     := $(BUILD_DIR)/rootfs
+INITRAMFS  := $(BUILD_DIR)/initrd.img
 
 BUSYBOX     := $(CACHE_DIR)/busybox
 BUSYBOX_URL := https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox
