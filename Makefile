@@ -99,7 +99,12 @@ $(ROOTFS_STAMP): $(BUSYBOX) | $(BUILD_DIR)
 	if [ -d $(OVERLAYFS) ]; then cp -a $(OVERLAYFS)/. $(ROOTFS)/; fi
 	touch $@
 
-initramfs: $(INITRAMFS)
+rootfs: $(ROOTFS_STAMP)
+
+$(INITRAMFS): $(ROOTFS_STAMP) $(BZIMAGE) | $(BUILD_DIR)
+	cd $(ROOTFS) && \
+		find . -print0 | LC_ALL=C sort -z | \
+		cpio --null -o --format=newc --owner=root:root > $@
 
 $(INITRAMFS): rootfs linux | $(BUILD_DIR)
 	cd $(ROOTFS) && find . -print0 | LC_ALL=C sort -z | cpio --null -o --format=newc --owner=root:root > "$@"
