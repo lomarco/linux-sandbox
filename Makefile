@@ -81,7 +81,17 @@ $(ROOTFS)/$(OVERLAYFS):
 
 rootfs: $(ROOTFS_INIT)
 
-$(ROOTFS_INIT): $(BUSYBOX) | $(BUILD_DIR)
+linux-rebuild: $(LINUX_STAMP)
+	$(LINUX_DIR)/scripts/config --file $(LINUX_CONFIG) \
+		--set-str INITRAMFS_SOURCE "$(ROOTFS)"
+	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
+
+linux-reinstall: | $(CACHE_DIR)
+	curl -fL --retry 3 --retry-delay 1 -o $(LINUX_TARBALL) $(LINUX_URL)
+	rm -rf $(LINUX_DIR)
+	$(MAKE) $(BZIMAGE)
+
+$(ROOTFS_STAMP): $(BUSYBOX) | $(BUILD_DIR)
 	rm -rf $(ROOTFS)
 	mkdir -p $(ROOTFS)/{bin,etc,proc,sys,dev,tmp,mnt,root}
 	$(BUSYBOX) --install $(ROOTFS)/bin
