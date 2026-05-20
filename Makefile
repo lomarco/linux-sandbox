@@ -15,7 +15,7 @@ LINUX_URL := https://www.kernel.org/pub/linux/kernel/v7.x/linux-7.0.8.tar.xz
 
 LINUX_DIR := $(BUILD_DIR)/linux
 LINUX_UNPACK_STAMP := $(LINUX_DIR)/.unpacked
-BZIMAGE := $(LINUX_DIR)/arch/x86/boot/bzImage
+LINUX_CONFIG := $(LINUX_DIR)/.config
 
 BUSYBOX_INSTALL := $(ROOTFS)/.busybox-installed
 ROOTFS_INIT := $(ROOTFS)/.prepared
@@ -69,12 +69,12 @@ $(LINUX_UNPACK_STAMP): $(LINUX_TARBALL) | $(BUILD_DIR)
 	tar -xJf $< -C $(LINUX_DIR) --strip-components=1
 	touch $@
 
-$(LINUX_TARBALL): | $(CACHE_DIR)
-	curl -fSLo $@ $(LINUX_URL)
-
-$(BZIMAGE): $(LINUX_UNPACK_STAMP)
+$(LINUX_CONFIG): $(LINUX_STAMP)
 	$(MAKE) -C $(LINUX_DIR) tinyconfig
-	$(MAKE) -C $(LINUX_DIR) -j$$(nproc) 2>&1 | tee build-kernel.log
+	$(LINUX_DIR)/scripts/config --file $@ \
+		--enable TTY \
+		--set-str INITRAMFS_SOURCE "$(ROOTFS)"
+	touch $@
 
 $(ROOTFS)/$(OVERLAYFS):
 	cp -r $(OVERLAYFS)/* $(ROOTFS)
