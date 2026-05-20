@@ -11,11 +11,12 @@ BUSYBOX     := $(CACHE_DIR)/busybox
 BUSYBOX_URL := https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox
 
 LINUX_TARBALL := $(CACHE_DIR)/linux.tar.xz
-LINUX_URL := https://www.kernel.org/pub/linux/kernel/v7.x/linux-7.0.8.tar.xz
+LINUX_URL     := https://www.kernel.org/pub/linux/kernel/v7.x/linux-7.0.8.tar.xz
 
-LINUX_DIR := $(BUILD_DIR)/linux
-LINUX_UNPACK_STAMP := $(LINUX_DIR)/.unpacked
+LINUX_DIR    := $(BUILD_DIR)/linux
+LINUX_STAMP  := $(LINUX_DIR)/.unpacked
 LINUX_CONFIG := $(LINUX_DIR)/.config
+BZIMAGE      := $(LINUX_DIR)/arch/x86/boot/bzImage
 
 BUSYBOX_INSTALL := $(ROOTFS)/.busybox-installed
 ROOTFS_INIT := $(ROOTFS)/.prepared
