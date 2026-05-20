@@ -31,7 +31,7 @@ all: initrd
 
 rebuild: clean all
 
-run: initramfs
+run:
 	$(QEMU) $(QEMU_OPTS)
 
 $(BUILD_DIR) $(CACHE_DIR):
