@@ -49,18 +49,6 @@ busybox: $(BUSYBOX)
 busybox-reinstall: | $(CACHE_DIR)
 	curl -fSLo $(BUSYBOX) $(BUSYBOX_URL)
 	chmod +x $(BUSYBOX)
-	rm -f $(BUSYBOX_INSTALL)
-
-linux: $(BZIMAGE)
-
-linux-reinstall: | $(CACHE_DIR)
-	curl -fSLo $(LINUX_TARBALL) $(LINUX_URL)
-	rm -rf $(LINUX_DIR)
-	mkdir -p $(LINUX_DIR)
-	tar -xJf $(LINUX_TARBALL) -C $(LINUX_DIR) --strip-components=1
-	$(MAKE) -C $(LINUX_DIR) tinyconfig
-	$(MAKE) -C $(LINUX_DIR) -j$$(nproc) 2>&1 | tee build-kernel.log
-	touch $(LINUX_UNPACK_STAMP)
 
 $(LINUX_TARBALL): | $(CACHE_DIR)
 	curl -fSLo $@ $(LINUX_URL)
