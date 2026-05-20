@@ -115,4 +115,4 @@ help:
 	'\n' \
 	'  run               Start qemu with the built kernel and initramfs'
 
-.PHONY: all help clean distclean initramfs rootfs busybox busybox-reinstall linux linux-reinstall linux-rebuild run
+.PHONY: all run help clean distclean rebuild busybox busybox-reinstall linux linux-reinstall linux-rebuild rootfs initramfs
