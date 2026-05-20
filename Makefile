@@ -28,6 +28,8 @@ QEMU_OPTS := -m 512M \
 						 -enable-kvm \
 						 -serial mon:stdio
 
+JOBS ?= $(shell nproc)
+
 all: initramfs
 
 rebuild: clean all
