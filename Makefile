@@ -83,12 +83,11 @@ linux-reinstall: | $(CACHE_DIR)
 	$(MAKE) $(BZIMAGE)
 
 $(ROOTFS_STAMP): $(BUSYBOX) | $(BUILD_DIR)
-	rm -rf $(ROOTFS)
-	mkdir -p $(ROOTFS)/{bin,etc,proc,sys,dev,tmp,mnt,root}
-	$(BUSYBOX) --install $(ROOTFS)/bin
-	ln -sf /bin/init $(ROOTFS)/init
-	if [ -d $(OVERLAYFS) ]; then cp -a $(OVERLAYFS)/. $(ROOTFS)/; fi
-	touch $@
+	rm -rf $@
+	mkdir -p $@/{bin,etc,proc,sys,dev,tmp,mnt,root}
+	$(BUSYBOX) --install $@/bin
+	ln -sf /bin/init $@/init
+	if [ -d $(OVERLAYFS) ]; then cp -a $(OVERLAYFS)/. $@/; fi
 
 rootfs: $(ROOTFS_STAMP)
 
