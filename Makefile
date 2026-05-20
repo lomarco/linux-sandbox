@@ -1,6 +1,4 @@
-BUILD_DIR := $(abspath build)
-CACHE_DIR := $(abspath cache)
-OVERLAYFS := $(abspath overlayfs)
+.SHELLFLAGS := -euo pipefail -c
 
 ROOTFS := $(BUILD_DIR)/rootfs
 INITRAMFS := $(BUILD_DIR)/initrd.img
