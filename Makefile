@@ -14,11 +14,8 @@ LINUX_TARBALL := $(CACHE_DIR)/linux.tar.xz
 LINUX_URL     := https://www.kernel.org/pub/linux/kernel/v7.x/linux-7.0.8.tar.xz
 
 LINUX_DIR    := $(BUILD_DIR)/linux
-LINUX_STAMP  := $(LINUX_DIR)/.unpacked
 LINUX_CONFIG := $(LINUX_DIR)/.config
 BZIMAGE      := $(LINUX_DIR)/arch/x86/boot/bzImage
-
-ROOTFS_STAMP := $(ROOTFS)/.prepared
 
 QEMU := qemu-system-x86_64
 QEMU_OPTS := -m 512M \
@@ -53,26 +50,23 @@ busybox-reinstall: | $(CACHE_DIR)
 $(LINUX_TARBALL): | $(CACHE_DIR)
 	curl -fSLo $@ $(LINUX_URL)
 
-$(LINUX_STAMP): $(LINUX_TARBALL) | $(BUILD_DIR)
-	rm -rf $(LINUX_DIR)
-	mkdir -p $(LINUX_DIR)
-	tar -xJf $< -C $(LINUX_DIR) --strip-components=1
-	touch $@
+$(LINUX_DIR): $(LINUX_TARBALL) | $(BUILD_DIR)
+	rm -rf $@
+	mkdir -p $@
+	tar -xJf $< -C $@ --strip-components=1
 
-$(LINUX_CONFIG): $(LINUX_STAMP)
+$(LINUX_CONFIG): $(LINUX_DIR)
 	$(MAKE) -C $(LINUX_DIR) tinyconfig
 	$(LINUX_DIR)/scripts/config --file $@ \
 		--enable TTY \
 		--set-str INITRAMFS_SOURCE "$(ROOTFS)"
-	touch $@
 
 $(BZIMAGE): $(LINUX_CONFIG)
 	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
-	@test -f $@
 
 linux: $(BZIMAGE)
 
-linux-rebuild: $(LINUX_STAMP)
+linux-rebuild: $(LINUX_DIR)
 	$(LINUX_DIR)/scripts/config --file $(LINUX_CONFIG) \
 		--set-str INITRAMFS_SOURCE "$(ROOTFS)"
 	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
@@ -82,16 +76,16 @@ linux-reinstall: | $(CACHE_DIR)
 	rm -rf $(LINUX_DIR)
 	$(MAKE) $(BZIMAGE)
 
-$(ROOTFS_STAMP): $(BUSYBOX) | $(BUILD_DIR)
+$(ROOTFS): $(BUSYBOX) | $(BUILD_DIR)
 	rm -rf $@
 	mkdir -p $@/{bin,etc,proc,sys,dev,tmp,mnt,root}
 	$(BUSYBOX) --install $@/bin
 	ln -sf /bin/init $@/init
 	if [ -d $(OVERLAYFS) ]; then cp -a $(OVERLAYFS)/. $@/; fi
 
-rootfs: $(ROOTFS_STAMP)
+rootfs: $(ROOTFS)
 
-$(INITRAMFS): $(ROOTFS_STAMP) $(BZIMAGE) | $(BUILD_DIR)
+$(INITRAMFS): $(ROOTFS) $(BZIMAGE) | $(BUILD_DIR)
 	cd $(ROOTFS) && \
 		find . -print0 | LC_ALL=C sort -z | \
 		cpio --null -o --format=newc --owner=root:root > $@
