@@ -60,10 +60,10 @@ linux-reinstall: | $(CACHE_DIR)
 	$(MAKE) -C $(LINUX_DIR) -j$$(nproc) 2>&1 | tee build-kernel.log
 	touch $(LINUX_UNPACK_STAMP)
 
-linux-rebuild: $(LINUX_UNPACK_STAMP)
-	$(MAKE) -C $(LINUX_DIR) -j$$(nproc) 2>&1 | tee build-kernel.log
+$(LINUX_TARBALL): | $(CACHE_DIR)
+	curl -fSLo $@ $(LINUX_URL)
 
-$(LINUX_UNPACK_STAMP): $(LINUX_TARBALL) | $(BUILD_DIR)
+$(LINUX_STAMP): $(LINUX_TARBALL) | $(BUILD_DIR)
 	rm -rf $(LINUX_DIR)
 	mkdir -p $(LINUX_DIR)
 	tar -xJf $< -C $(LINUX_DIR) --strip-components=1
@@ -76,10 +76,11 @@ $(LINUX_CONFIG): $(LINUX_STAMP)
 		--set-str INITRAMFS_SOURCE "$(ROOTFS)"
 	touch $@
 
-$(ROOTFS)/$(OVERLAYFS):
-	cp -r $(OVERLAYFS)/* $(ROOTFS)
+$(BZIMAGE): $(LINUX_CONFIG)
+	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
+	@test -f $@
 
-rootfs: $(ROOTFS_INIT)
+linux: $(BZIMAGE)
 
 linux-rebuild: $(LINUX_STAMP)
 	$(LINUX_DIR)/scripts/config --file $(LINUX_CONFIG) \
