@@ -18,8 +18,7 @@ LINUX_STAMP  := $(LINUX_DIR)/.unpacked
 LINUX_CONFIG := $(LINUX_DIR)/.config
 BZIMAGE      := $(LINUX_DIR)/arch/x86/boot/bzImage
 
-BUSYBOX_INSTALL := $(ROOTFS)/.busybox-installed
-ROOTFS_INIT := $(ROOTFS)/.prepared
+ROOTFS_STAMP := $(ROOTFS)/.prepared
 
 QEMU := qemu-system-x86_64
 QEMU_OPTS := -m 512M \
