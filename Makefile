@@ -95,24 +95,41 @@ initrd: $(INITRD)
 clean:
 	rm -rf $(BUILD_DIR)
 
-distclean: clean
+clean-cache: clean-busybox clean-linux
 	rm -rf $(CACHE_DIR)
+
+clean-linux:
+	rm -rf $(LINUX_DIR)
+	rm -f $(LINUX_TARBALL)
+
+clean-busybox:
+	rm -f $(BUSYBOX)
+
+clean-initrd:
+	rm -rf $(ROOTFS)
+	rm -f $(INITRD)
+
+wipe: clean clean-cache
 
 help:
 	@printf '%s\n' \
 	'Usage: make [target]' \
 	'' \
 	'Targets:' \
-	'  all               Build initrd (default)' \
-	'  initrd            Build initrd image' \
-	'  rootfs            Prepare rootfs' \
-	'  busybox           Download BusyBox to cache' \
-	'  busybox-reinstall Redownload BusyBox' \
-	'  linux             Build Linux kernel' \
-	'  linux-reinstall   Redownload and rebuild Linux from scratch' \
-	'  linux-rebuild     Rebuild Linux in existing tree' \
-	'  run               Boot QEMU' \
-	'  clean             Remove build artifacts' \
-	'  distclean         Remove build artifacts and cache'
+	'  initrd               Build initrd image' \
+	'  rootfs               Prepare rootfs' \
+	'  busybox              Download BusyBox to cache' \
+	'  busybox-reinstall    Redownload BusyBox' \
+	'  linux                Build Linux kernel' \
+	'  linux-reinstall      Redownload and rebuild Linux from scratch' \
+	'  linux-rebuild        Rebuild Linux in existing tree' \
+	'  run                  Boot QEMU' \
+	'' \
+	'  clean            Remove build artifacts' \
+	'  clean-cache      Remove cache' \
+	'  clean-linux      Remove linux from build and cache' \
+	'  clean-busybox    Remove busybox from cache' \
+	'  clean-initrd     Remove initrd from build' \
+	'  wipe             Wipe all'
 
-.PHONY: all run help clean distclean rebuild busybox busybox-reinstall linux linux-reinstall linux-rebuild rootfs initrd
+.PHONY: all run help clean clean-cache clean-linux clean-busybox clean-initrd wipe rebuild busybox busybox-reinstall linux linux-reinstall linux-rebuild rootfs initrd
