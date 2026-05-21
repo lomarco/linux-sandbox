@@ -120,6 +120,7 @@ help:
 	'Targets:' \
 	'  initrd               Build initrd image' \
 	'  rootfs               Prepare rootfs' \
+	'  rebuild              Clean and build' \
 	'  busybox              Download BusyBox to cache' \
 	'  busybox-reinstall    Redownload BusyBox' \
 	'  linux                Build Linux kernel' \
