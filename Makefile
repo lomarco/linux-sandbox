@@ -91,6 +91,9 @@ clean:
 clean-cache:
 	rm -rf $(CACHE_DIR)
 
+clean-linux:
+	$(MAKE) -C $(LINUX_DIR) clean
+
 clean-linux-dir:
 	rm -rf $(LINUX_DIR)
 
@@ -123,10 +126,11 @@ help:
 	'' \
 	'  clean              Remove build artifacts' \
 	'  clean-cache        Remove cache' \
+	'  clean-linux        Execute `make clean` into build/linux' \
 	'  clean-linux-dir    Remove linux dir' \
 	'  clean-linux-tar    Remove installed linux tarball' \
 	'  clean-busybox      Remove busybox from cache' \
 	'  clean-initrd       Remove initrd from build' \
 	'  wipe               Wipe all'
 
-.PHONY: all run help clean clean-cache clean-linux-dir clean-linux-tar clean-busybox clean-initrd wipe rebuild busybox busybox-reinstall linux linux-reinstall linux-rebuild rootfs initrd
+.PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd wipe rebuild busybox busybox-reinstall linux linux-reinstall linux-rebuild rootfs initrd
