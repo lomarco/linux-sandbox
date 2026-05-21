@@ -127,12 +127,12 @@ help:
 	'  linux-rebuild        Rebuild Linux in existing tree' \
 	'  run                  Boot QEMU' \
 	'' \
-	'  clean            Remove build artifacts' \
-	'  clean-cache      Remove cache' \
-	'  clean-linux-dir  Remove linux dir' \
-	'  clean-linux-tar  Remove installed linux tarball' \
-	'  clean-busybox    Remove busybox from cache' \
-	'  clean-initrd     Remove initrd from build' \
-	'  wipe             Wipe all'
+	'  clean              Remove build artifacts' \
+	'  clean-cache        Remove cache' \
+	'  clean-linux-dir    Remove linux dir' \
+	'  clean-linux-tar    Remove installed linux tarball' \
+	'  clean-busybox      Remove busybox from cache' \
+	'  clean-initrd       Remove initrd from build' \
+	'  wipe               Wipe all'
 
 .PHONY: all run help clean clean-cache clean-linux-dir clean-linux-tar clean-busybox clean-initrd wipe rebuild busybox busybox-reinstall linux linux-reinstall linux-rebuild rootfs initrd
