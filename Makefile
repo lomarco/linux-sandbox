@@ -43,9 +43,7 @@ $(BUSYBOX): | $(CACHE_DIR)
 
 busybox: $(BUSYBOX)
 
-busybox-reinstall: | $(CACHE_DIR)
-	curl -fSLo $(BUSYBOX) $(BUSYBOX_URL)
-	chmod +x $(BUSYBOX)
+busybox-reinstall: clean-busybox $(BUSYBOX)
 
 $(LINUX_TARBALL): | $(CACHE_DIR)
 	curl -fSLo $@ $(LINUX_URL)
@@ -66,14 +64,9 @@ $(BZIMAGE): $(LINUX_CONFIG)
 
 linux: $(BZIMAGE)
 
-linux-rebuild: $(LINUX_DIR)
-	$(LINUX_DIR)/scripts/config --file $(LINUX_CONFIG) \
-		--set-str INITRAMFS_SOURCE "$(ROOTFS)"
-	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
+linux-rebuild: clean-linux-dir $(BZIMAGE)
 
-linux-reinstall: | $(CACHE_DIR)
-	curl -fL --retry 3 --retry-delay 1 -o $(LINUX_TARBALL) $(LINUX_URL)
-	rm -rf $(LINUX_DIR)
+linux-reinstall: clean-linux-tar $(LINUX_TARBALL)
 
 $(ROOTFS): $(BUSYBOX) | $(BUILD_DIR)
 	rm -rf $@
