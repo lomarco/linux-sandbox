@@ -3,6 +3,25 @@
 ## About
 Linux Sandbox is a minimal environment for experimenting with the Linux kernel and userspace. It provides fast, reproducible builds and boots QEMU with a customizable rootfs filesystem.
 
+## Quick start
+To begin using Linux Sandbox, run:
+```bash
+make
+```
+This will download required files and build the kernel and initramfs.
+
+If you modified the kernel source and need to rebuild only the kernel, run:
+```bash
+make linux-rebuild
+```
+
+To boot the built image in QEMU, run:
+```bash
+make run
+```
+
+The rest you can look at `make help`.
+
 ## Dependencies
 - bash >=4
 - make >=4.0
