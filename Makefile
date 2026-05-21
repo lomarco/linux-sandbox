@@ -98,8 +98,10 @@ clean:
 clean-cache: clean-busybox clean-linux
 	rm -rf $(CACHE_DIR)
 
-clean-linux:
+clean-linux-dir:
 	rm -rf $(LINUX_DIR)
+
+clean-linux-tar:
 	rm -f $(LINUX_TARBALL)
 
 clean-busybox:
@@ -127,9 +129,10 @@ help:
 	'' \
 	'  clean            Remove build artifacts' \
 	'  clean-cache      Remove cache' \
-	'  clean-linux      Remove linux from build and cache' \
+	'  clean-linux-dir  Remove linux dir' \
+	'  clean-linux-tar  Remove installed linux tarball' \
 	'  clean-busybox    Remove busybox from cache' \
 	'  clean-initrd     Remove initrd from build' \
 	'  wipe             Wipe all'
 
-.PHONY: all run help clean clean-cache clean-linux clean-busybox clean-initrd wipe rebuild busybox busybox-reinstall linux linux-reinstall linux-rebuild rootfs initrd
+.PHONY: all run help clean clean-cache clean-linux-dir clean-linux-tar clean-busybox clean-initrd wipe rebuild busybox busybox-reinstall linux linux-reinstall linux-rebuild rootfs initrd
