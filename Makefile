@@ -17,8 +17,9 @@ LINUX_DIR    := $(BUILD_DIR)/linux
 LINUX_CONFIG := $(LINUX_DIR)/.config
 BZIMAGE      := $(LINUX_DIR)/arch/x86/boot/bzImage
 
+MEM := 512M
 QEMU := qemu-system-x86_64
-QEMU_OPTS := -m 512M \
+QEMU_OPTS := -m $(MEM) \
 						 -initrd $(INITRD) \
 						 -kernel $(BZIMAGE) \
 						 -append "console=ttyS0" \
