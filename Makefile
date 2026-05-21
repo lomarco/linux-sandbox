@@ -95,7 +95,7 @@ initrd: $(INITRD)
 clean:
 	rm -rf $(BUILD_DIR)
 
-clean-cache: clean-busybox clean-linux
+clean-cache:
 	rm -rf $(CACHE_DIR)
 
 clean-linux-dir:
