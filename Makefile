@@ -64,7 +64,7 @@ $(BZIMAGE): $(LINUX_CONFIG)
 
 linux: $(BZIMAGE)
 
-linux-rebuild: clean-linux-dir $(BZIMAGE)
+linux-rebuild: clean-linux $(BZIMAGE)
 
 linux-reinstall: clean-linux-tar $(LINUX_TARBALL)
 
