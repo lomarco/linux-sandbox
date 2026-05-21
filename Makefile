@@ -66,7 +66,7 @@ linux: $(BZIMAGE)
 
 linux-rebuild: clean-linux $(BZIMAGE)
 
-linux-reinstall: clean-linux-tar $(LINUX_TARBALL)
+linux-reinstall: clean-linux-tar clean-linux-build $(LINUX_TARBALL)
 
 $(ROOTFS): $(BUSYBOX) | $(BUILD_DIR)
 	rm -rf $@
