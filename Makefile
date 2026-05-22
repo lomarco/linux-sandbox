@@ -122,32 +122,23 @@ wipe: clean clean-cache
 
 help:
 	@printf '%s\n' \
-	'Usage: make [target]' \
-	'' \
-	'Targets:' \
-	'  initrd               Build initrd image' \
-	'  rootfs               Prepare rootfs' \
-	'  rebuild              Clean and build' \
-	'  busybox              Download BusyBox to cache' \
-	'  busybox-reinstall    Redownload BusyBox' \
-	'  linux                Build Linux kernel' \
-	'  linux-reinstall      Redownload and rebuild Linux from scratch' \
-	'  linux-rebuild        Rebuild Linux in existing tree' \
-	'  run                  Boot QEMU' \
-	'' \
-	'  clean              Remove build artifacts' \
-	'  clean-cache        Remove cache' \
-	'  clean-linux        Execute `make clean` into build/linux' \
-	'  clean-linux-dir    Remove linux dir' \
-	'  clean-linux-tar    Remove installed linux tarball' \
-	'  clean-busybox      Remove busybox from cache' \
-	'  clean-initrd       Remove initrd from build' \
-	'  wipe               Wipe all' \
-	'' \
-	'' \
-	'Variables:' \
-	'  INITRD  - Initrd path' \
-	'  BZIMAGE - Linux Kernel path' \
-	'  MEM - Memory count for QEMU'
+		'Usage: make [target]' \
+		'' \
+		'Targets:' \
+		'  all               Build everything' \
+		'  initrd            Build initrd image' \
+		'  rootfs            Prepare rootfs' \
+		'  linux             Build Linux kernel' \
+		'  rebuild           Clean and build' \
+		'  run               Boot QEMU' \
+		'  busybox           Download BusyBox to cache' \
+		'  busybox-reinstall Redownload BusyBox' \
+		'  linux-reinstall   Redownload and rebuild Linux from scratch' \
+		'  linux-rebuild     Rebuild Linux in existing tree' \
+		'' \
+		'Variables:' \
+		'  INITRD  - Initrd path' \
+		'  BZIMAGE - Linux Kernel path' \
+		'  MEM - Memory count for QEMU'
 
 .PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd wipe rebuild busybox busybox-reinstall linux linux-reinstall linux-rebuild rootfs initrd
