@@ -17,6 +17,9 @@ LINUX_DIR    := $(BUILD_DIR)/linux
 LINUX_CONFIG := $(LINUX_DIR)/.config
 BZIMAGE      := $(LINUX_DIR)/arch/x86/boot/bzImage
 
+LINUX_STAMP  := $(BUILD_DIR)/.linux-stamp
+ROOTFS_STAMP := $(BUILD_DIR)/.rootfs-stamp
+
 MEM := 512M
 QEMU := qemu-system-x86_64
 QEMU_OPTS := -m $(MEM) \
@@ -28,14 +31,14 @@ QEMU_OPTS := -m $(MEM) \
 
 JOBS ?= $(shell nproc)
 
-all: initrd
+all: linux rootfs initrd
 
 rebuild: clean all
 
 run:
 	$(QEMU) $(QEMU_OPTS)
 
-$(BUILD_DIR) $(CACHE_DIR):
+$(BUILD_DIR) $(CACHE_DIR) $(OVERLAYFS):
 	mkdir -p $@
 
 $(BUSYBOX): | $(CACHE_DIR)
@@ -54,31 +57,35 @@ $(LINUX_DIR): $(LINUX_TARBALL) | $(BUILD_DIR)
 	mkdir -p $@
 	tar -xJf $< -C $@ --strip-components=1
 
-$(LINUX_CONFIG): $(LINUX_DIR)
+$(LINUX_CONFIG): | $(LINUX_DIR)
 	$(MAKE) -C $(LINUX_DIR) tinyconfig
-	$(LINUX_DIR)/scripts/config --file $@ \
+	$(LINUX_DIR)/scripts/config --file $(LINUX_CONFIG) \
 		--enable TTY \
 		--set-str INITRAMFS_SOURCE "$(ROOTFS)"
 
-$(BZIMAGE): $(LINUX_CONFIG)
+$(BZIMAGE): $(LINUX_CONFIG) | $(LINUX_DIR)
 	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
+	touch $(LINUX_STAMP)
 
 linux: $(BZIMAGE)
 
-linux-rebuild: clean-linux $(BZIMAGE)
+linux-rebuild: clean-linux-dir linux
 
-linux-reinstall: clean-linux-tar clean-linux-build $(LINUX_TARBALL)
+linux-reinstall: clean-linux-tar clean-linux-dir $(BZIMAGE)
 
 $(ROOTFS): $(BUSYBOX) | $(BUILD_DIR)
 	rm -rf $@
 	mkdir -p $@/{bin,etc,proc,sys,dev,tmp,mnt,root}
 	$(BUSYBOX) --install $@/bin
 	ln -sf /bin/init $@/init
-	if [ -d $(OVERLAYFS) ]; then cp -a $(OVERLAYFS)/. $@/; fi
+	if [ -d $(OVERLAYFS) ]; then \
+		cp -a $(OVERLAYFS)/. $@/; \
+	fi
+	touch $(ROOTFS_STAMP)
 
 rootfs: $(ROOTFS)
 
-$(INITRD): $(ROOTFS) $(BZIMAGE) | $(BUILD_DIR)
+$(INITRD): $(ROOTFS_STAMP) | $(BUILD_DIR) $(ROOTFS)
 	cd $(ROOTFS) && \
 		find . -print0 | LC_ALL=C sort -z | \
 		cpio --null -o --format=newc --owner=root:root | \
@@ -88,15 +95,18 @@ initrd: $(INITRD)
 
 clean:
 	rm -rf $(BUILD_DIR)
+	rm -f $(LINUX_STAMP) $(ROOTFS_STAMP)
 
 clean-cache:
 	rm -rf $(CACHE_DIR)
 
 clean-linux:
 	$(MAKE) -C $(LINUX_DIR) clean
+	rm -f $(LINUX_STAMP)
 
 clean-linux-dir:
 	rm -rf $(LINUX_DIR)
+	rm -f $(LINUX_STAMP)
 
 clean-linux-tar:
 	rm -f $(LINUX_TARBALL)
@@ -106,7 +116,7 @@ clean-busybox:
 
 clean-initrd:
 	rm -rf $(ROOTFS)
-	rm -f $(INITRD)
+	rm -f $(INITRD) $(ROOTFS_STAMP)
 
 wipe: clean clean-cache
 
