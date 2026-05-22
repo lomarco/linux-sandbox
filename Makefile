@@ -31,14 +31,14 @@ QEMU_OPTS := -m $(MEM) \
 
 JOBS ?= $(shell nproc)
 
-all: initrd
+all: linux rootfs initrd
 
 rebuild: clean all
 
 run:
 	$(QEMU) $(QEMU_OPTS)
 
-$(BUILD_DIR) $(CACHE_DIR):
+$(BUILD_DIR) $(CACHE_DIR) $(OVERLAYFS):
 	mkdir -p $@
 
 $(BUSYBOX): | $(CACHE_DIR)
@@ -57,33 +57,35 @@ $(LINUX_DIR): $(LINUX_TARBALL) | $(BUILD_DIR)
 	mkdir -p $@
 	tar -xJf $< -C $@ --strip-components=1
 
-$(LINUX_CONFIG): $(LINUX_DIR)
+$(LINUX_CONFIG): | $(LINUX_DIR)
 	$(MAKE) -C $(LINUX_DIR) tinyconfig
-	$(LINUX_DIR)/scripts/config --file $@ \
+	$(LINUX_DIR)/scripts/config --file $(LINUX_CONFIG) \
 		--enable TTY \
 		--set-str INITRAMFS_SOURCE "$(ROOTFS)"
 
-$(BZIMAGE): $(LINUX_CONFIG)
+$(BZIMAGE): $(LINUX_CONFIG) | $(LINUX_DIR)
 	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
-	 touch $(LINUX_STAMP)
+	touch $(LINUX_STAMP)
 
 linux: $(BZIMAGE)
 
-linux-rebuild: clean-linux $(BZIMAGE)
+linux-rebuild: clean-linux-dir linux
 
-linux-reinstall: clean-linux-tar clean-linux-build $(LINUX_TARBALL)
+linux-reinstall: clean-linux-tar clean-linux-dir $(BZIMAGE)
 
 $(ROOTFS): $(BUSYBOX) | $(BUILD_DIR)
 	rm -rf $@
 	mkdir -p $@/{bin,etc,proc,sys,dev,tmp,mnt,root}
 	$(BUSYBOX) --install $@/bin
 	ln -sf /bin/init $@/init
-	if [ -d $(OVERLAYFS) ]; then cp -a $(OVERLAYFS)/. $@/; fi
+	if [ -d $(OVERLAYFS) ]; then \
+		cp -a $(OVERLAYFS)/. $@/; \
+	fi
 	touch $(ROOTFS_STAMP)
 
 rootfs: $(ROOTFS)
 
-$(INITRD): $(ROOTFS_STAMP) $(LINUX_STAMP) $(BZIMAGE) | $(BUILD_DIR)
+$(INITRD): $(ROOTFS_STAMP) | $(BUILD_DIR) $(ROOTFS)
 	cd $(ROOTFS) && \
 		find . -print0 | LC_ALL=C sort -z | \
 		cpio --null -o --format=newc --owner=root:root | \
