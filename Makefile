@@ -17,6 +17,9 @@ LINUX_DIR    := $(BUILD_DIR)/linux
 LINUX_CONFIG := $(LINUX_DIR)/.config
 BZIMAGE      := $(LINUX_DIR)/arch/x86/boot/bzImage
 
+LINUX_STAMP  := $(BUILD_DIR)/.linux-stamp
+ROOTFS_STAMP := $(BUILD_DIR)/.rootfs-stamp
+
 MEM := 512M
 QEMU := qemu-system-x86_64
 QEMU_OPTS := -m $(MEM) \
@@ -62,6 +65,7 @@ $(LINUX_CONFIG): $(LINUX_DIR)
 
 $(BZIMAGE): $(LINUX_CONFIG)
 	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
+	 touch $(LINUX_STAMP)
 
 linux: $(BZIMAGE)
 
@@ -75,10 +79,11 @@ $(ROOTFS): $(BUSYBOX) | $(BUILD_DIR)
 	$(BUSYBOX) --install $@/bin
 	ln -sf /bin/init $@/init
 	if [ -d $(OVERLAYFS) ]; then cp -a $(OVERLAYFS)/. $@/; fi
+	touch $(ROOTFS_STAMP)
 
 rootfs: $(ROOTFS)
 
-$(INITRD): $(ROOTFS) $(BZIMAGE) | $(BUILD_DIR)
+$(INITRD): $(ROOTFS_STAMP) $(LINUX_STAMP) $(BZIMAGE) | $(BUILD_DIR)
 	cd $(ROOTFS) && \
 		find . -print0 | LC_ALL=C sort -z | \
 		cpio --null -o --format=newc --owner=root:root | \
@@ -88,15 +93,18 @@ initrd: $(INITRD)
 
 clean:
 	rm -rf $(BUILD_DIR)
+	rm -f $(LINUX_STAMP) $(ROOTFS_STAMP)
 
 clean-cache:
 	rm -rf $(CACHE_DIR)
 
 clean-linux:
 	$(MAKE) -C $(LINUX_DIR) clean
+	rm -f $(LINUX_STAMP)
 
 clean-linux-dir:
 	rm -rf $(LINUX_DIR)
+	rm -f $(LINUX_STAMP)
 
 clean-linux-tar:
 	rm -f $(LINUX_TARBALL)
@@ -106,7 +114,7 @@ clean-busybox:
 
 clean-initrd:
 	rm -rf $(ROOTFS)
-	rm -f $(INITRD)
+	rm -f $(INITRD) $(ROOTFS_STAMP)
 
 wipe: clean clean-cache
 
