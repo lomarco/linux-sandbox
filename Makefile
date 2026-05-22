@@ -132,6 +132,12 @@ help:
 	'  clean-linux-tar    Remove installed linux tarball' \
 	'  clean-busybox      Remove busybox from cache' \
 	'  clean-initrd       Remove initrd from build' \
-	'  wipe               Wipe all'
+	'  wipe               Wipe all' \
+	'' \
+	'' \
+	'Variables:' \
+	'  INITRD  - Initrd path' \
+	'  BZIMAGE - Linux Kernel path' \
+	'  MEM - Memory count for QEMU'
 
 .PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd wipe rebuild busybox busybox-reinstall linux linux-reinstall linux-rebuild rootfs initrd
