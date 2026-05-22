@@ -22,6 +22,9 @@ make run
 
 The rest you can look at `make help`.
 
+## Recommendation
+- Feel free to change the variables from `make help` in the `make run` command.
+
 ## Dependencies
 - bash >=4
 - make >=4.0
