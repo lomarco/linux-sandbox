@@ -24,6 +24,7 @@ The rest you can look at `make help`.
 
 ## Recommendation
 - Feel free to change the variables from `make help` in the `make run` command.
+  - for example: `make run INITRD=/custom/path/initrd.img BZIMAGE=/custom/path/vmlinuz MEM=1024M`.
 
 ## Dependencies
 - bash >=4
