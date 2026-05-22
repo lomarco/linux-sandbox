@@ -52,6 +52,8 @@ busybox-reinstall: clean-busybox $(BUSYBOX)
 $(LINUX_TARBALL): | $(CACHE_DIR)
 	curl -fSLo $@ $(LINUX_URL)
 
+linux-extract: $(LINUX_DIR)
+
 $(LINUX_DIR): $(LINUX_TARBALL) | $(BUILD_DIR)
 	rm -rf $@
 	mkdir -p $@
@@ -133,6 +135,7 @@ help:
 		'  run               Boot QEMU' \
 		'  busybox           Download BusyBox to cache' \
 		'  busybox-reinstall Redownload BusyBox' \
+		'  linux-extract     Extracting linux tar to build' \
 		'  linux-reinstall   Redownload and rebuild Linux from scratch' \
 		'  linux-rebuild     Rebuild Linux in existing tree' \
 		'' \
@@ -141,4 +144,4 @@ help:
 		'  BZIMAGE - Linux Kernel path' \
 		'  MEM - Memory count for QEMU'
 
-.PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd wipe rebuild busybox busybox-reinstall linux linux-reinstall linux-rebuild rootfs initrd
+.PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd wipe rebuild busybox busybox-reinstall linux-extract linux linux-reinstall linux-rebuild rootfs initrd
