@@ -95,6 +95,8 @@ $(INITRD): $(ROOTFS_STAMP) | $(BUILD_DIR) $(ROOTFS)
 
 initrd: $(INITRD)
 
+initrd-rebuild: clean-initrd rootfs initrd
+
 clean:
 	rm -rf $(BUILD_DIR)
 	rm -f $(LINUX_STAMP) $(ROOTFS_STAMP)
@@ -129,6 +131,7 @@ help:
 		'Targets:' \
 		'  all               Build everything' \
 		'  initrd            Build initrd image' \
+		'  initrd-rebuild    Rebuild initrd image' \
 		'  rootfs            Prepare rootfs' \
 		'  linux             Build Linux kernel' \
 		'  rebuild           Clean and build' \
@@ -144,4 +147,4 @@ help:
 		'  BZIMAGE Linux Kernel path' \
 		'  MEM     Memory count for QEMU'
 
-.PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd wipe rebuild busybox busybox-reinstall linux-extract linux linux-reinstall linux-rebuild rootfs initrd
+.PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd wipe rebuild busybox busybox-reinstall linux-extract linux linux-reinstall linux-rebuild rootfs initrd initrd-rebuild
