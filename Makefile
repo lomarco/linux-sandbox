@@ -62,8 +62,21 @@ $(LINUX_DIR): $(LINUX_TARBALL) | $(BUILD_DIR)
 $(LINUX_CONFIG): | $(LINUX_DIR)
 	$(MAKE) -C $(LINUX_DIR) tinyconfig
 	$(LINUX_DIR)/scripts/config --file $(LINUX_CONFIG) \
-		--enable TTY \
-		--set-str INITRAMFS_SOURCE "$(ROOTFS)"
+		--set-val ARCH x86_64 \
+		--enable CONFIG_64BIT \
+		--enable CONFIG_TTY \
+		--enable CONFIG_PRINTK \
+		--enable CONFIG_BLK_DEV_INITRD \
+		--enable CONFIG_DEVTMPFS \
+		--enable CONFIG_PROC_FS \
+		--enable CONFIG_SYSFS \
+		--enable CONFIG_INITRAMFS_COMPRESSION_GZIP \
+		--enable CONFIG_BINFMT_ELF \
+		--enable CONFIG_BINFMT_SCRIPT \
+		--enable CONFIG_SERIAL_CORE \
+		--enable CONFIG_SERIAL_8250 \
+		--enable CONFIG_SERIAL_8250_CONSOLE
+	$(MAKE) -C $(LINUX_DIR) olddefconfig
 
 $(BZIMAGE): $(LINUX_CONFIG) | $(LINUX_DIR)
 	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
