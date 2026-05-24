@@ -4,6 +4,8 @@ BUILD_DIR  := $(abspath build)
 CACHE_DIR  := $(abspath cache)
 OVERLAYFS  := $(abspath overlayfs)
 
+LINUX_VERSION := 7.0.8
+
 ROOTFS := $(BUILD_DIR)/rootfs
 INITRD := $(BUILD_DIR)/initrd.img
 
@@ -11,7 +13,7 @@ BUSYBOX     := $(CACHE_DIR)/busybox
 BUSYBOX_URL := https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox
 
 LINUX_TARBALL := $(CACHE_DIR)/linux.tar.xz
-LINUX_URL     := https://www.kernel.org/pub/linux/kernel/v7.x/linux-7.0.8.tar.xz
+LINUX_URL     := https://www.kernel.org/pub/linux/kernel/v7.x/linux-$(LINUX_VERSION).tar.xz
 
 LINUX_DIR    := $(BUILD_DIR)/linux
 LINUX_CONFIG := $(LINUX_DIR)/.config
@@ -167,9 +169,10 @@ help:
 		'  wipe            Full cleanup: clean + clean-cache' \
 		'' \
 		'Variables:' \
-		'  INITRD  Initrd path' \
-		'  BZIMAGE Linux Kernel path' \
-		'  MEM     Memory for QEMU (e.g., 512M)' \
-		'  JOBS    Parallel make jobs (default: nproc)' 
+		'  INITRD        Initrd path' \
+		'  BZIMAGE       Linux Kernel path' \
+		'  MEM           Memory for QEMU (e.g., 512M)' \
+		'  JOBS          Parallel make jobs (default: nproc)' 
+		'  LINUX_VERSION Version Linux kernel' 
 
 .PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd wipe rebuild busybox busybox-reinstall linux-extract linux linux-reinstall linux-rebuild rootfs initrd initrd-rebuild
