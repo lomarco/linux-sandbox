@@ -146,33 +146,33 @@ help:
 		'Usage: make [target]' \
 		'' \
 		'Targets:' \
-		'  all               Build everything: linux, rootfs and initrd' \
-		'  initrd            Build initrd image from current rootfs' \
-		'  initrd-rebuild    Clean and rebuild initrd (recreate rootfs then initrd)' \
-		'  rootfs            Prepare minimal root filesystem using BusyBox' \
-		'  linux             Build Linux kernel (bzImage)' \
-		'  rebuild           Clean (all) and build everything' \
-		'  run               Boot the built kernel+initrd under QEMU' \
-		'  busybox           Download BusyBox binary into cache' \
-		'  busybox-reinstall Redownload BusyBox (useful after clean-cache)' \
-		'  linux-extract     Extract Linux tarball into build/linux' \
-		'  linux-reinstall   Remove linux tar/dir and rebuild kernel from scratch' \
-		'  linux-rebuild     Rebuild kernel in existing linux source tree' \
+		'  all                  Build everything: linux, rootfs and initrd' \
+		'  initrd               Build initrd image from current rootfs' \
+		'  initrd-rebuild       Clean and rebuild initrd (recreate rootfs then initrd)' \
+		'  rootfs               Prepare minimal root filesystem using BusyBox' \
+		'  linux                Build Linux kernel (bzImage)' \
+		'  rebuild              Clean (all) and build everything' \
+		'  run                  Boot the built kernel+initrd under QEMU' \
+		'  busybox              Download BusyBox binary into cache' \
+		'  busybox-reinstall    Redownload BusyBox (useful after clean-cache)' \
+		'  linux-extract        Extract Linux tarball into build/linux' \
+		'  linux-reinstall      Remove linux tar/dir and rebuild kernel from scratch' \
+		'  linux-rebuild        Rebuild kernel in existing linux source tree' \
 		'' \
-		'  clean           Remove build artifacts (build dir and stamps)' \
-		'  clean-cache     Remove cached downloads' \
-		'  clean-linux     Run make clean inside linux tree and remove stamp' \
-		'  clean-linux-dir Remove extracted linux source directory' \
-		'  clean-linux-tar Remove downloaded linux tarball' \
-		'  clean-busybox   Remove cached BusyBox binary' \
-		'  clean-initrd    Remove generated rootfs and initrd artifacts' \
-		'  wipe            Full cleanup: clean + clean-cache' \
+		'  clean              Remove build artifacts (build dir and stamps)' \
+		'  clean-cache        Remove cached downloads' \
+		'  clean-linux        Run make clean inside linux tree and remove stamp' \
+		'  clean-linux-dir    Remove extracted linux source directory' \
+		'  clean-linux-tar    Remove downloaded linux tarball' \
+		'  clean-busybox      Remove cached BusyBox binary' \
+		'  clean-initrd       Remove generated rootfs and initrd artifacts' \
+		'  wipe               Full cleanup: clean + clean-cache' \
 		'' \
 		'Variables:' \
-		'  INITRD        Initrd path' \
-		'  BZIMAGE       Linux Kernel path' \
-		'  MEM           Memory for QEMU (e.g., 512M)' \
-		'  JOBS          Parallel make jobs (default: nproc)' \
-		'  LINUX_VERSION Version Linux kernel' 
+		'  INITRD           Initrd path' \
+		'  BZIMAGE          Linux Kernel path' \
+		'  MEM              Memory for QEMU (e.g., 512M)' \
+		'  JOBS             Parallel make jobs (default: nproc)' \
+		'  LINUX_VERSION    Version Linux kernel' 
 
 .PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd wipe rebuild busybox busybox-reinstall linux-extract linux linux-reinstall linux-rebuild rootfs initrd initrd-rebuild
