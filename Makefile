@@ -20,7 +20,7 @@ BZIMAGE      := $(LINUX_DIR)/arch/x86/boot/bzImage
 LINUX_STAMP  := $(BUILD_DIR)/.linux-stamp
 ROOTFS_STAMP := $(BUILD_DIR)/.rootfs-stamp
 
-MEM := 512M
+MEM := 28M
 QEMU := qemu-system-x86_64
 QEMU_OPTS := -m $(MEM) \
 						 -initrd $(INITRD) \
