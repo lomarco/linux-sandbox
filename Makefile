@@ -143,6 +143,16 @@ help:
 		'  linux-extract     Extract Linux tarball into build/linux' \
 		'  linux-reinstall   Remove linux tar/dir and rebuild kernel from scratch' \
 		'  linux-rebuild     Rebuild kernel in existing linux source tree' \
+		'' \
+		'  clean           Remove build artifacts (build dir and stamps)' \
+		'  clean-cache     Remove cached downloads' \
+		'  clean-linux     Run make clean inside linux tree and remove stamp' \
+		'  clean-linux-dir Remove extracted linux source directory' \
+		'  clean-linux-tar Remove downloaded linux tarball' \
+		'  clean-busybox   Remove cached BusyBox binary' \
+		'  clean-initrd    Remove generated rootfs and initrd artifacts' \
+		'  wipe            Full cleanup: clean + clean-cache' \
+		'' \
 		'Variables:' \
 		'  INITRD  Initrd path' \
 		'  BZIMAGE Linux Kernel path' \
