@@ -131,22 +131,22 @@ help:
 		'Usage: make [target]' \
 		'' \
 		'Targets:' \
-		'  all               Build everything' \
-		'  initrd            Build initrd image' \
-		'  initrd-rebuild    Rebuild initrd image' \
-		'  rootfs            Prepare rootfs' \
-		'  linux             Build Linux kernel' \
-		'  rebuild           Clean and build' \
-		'  run               Boot QEMU' \
-		'  busybox           Download BusyBox to cache' \
-		'  busybox-reinstall Redownload BusyBox' \
-		'  linux-extract     Extracting linux tar to build' \
-		'  linux-reinstall   Redownload and rebuild Linux from scratch' \
-		'  linux-rebuild     Rebuild Linux in existing tree' \
-		'' \
+		'  all               Build everything: linux, rootfs and initrd' \
+		'  initrd            Build initrd image from current rootfs' \
+		'  initrd-rebuild    Clean and rebuild initrd (recreate rootfs then initrd)' \
+		'  rootfs            Prepare minimal root filesystem using BusyBox' \
+		'  linux             Build Linux kernel (bzImage)' \
+		'  rebuild           Clean (all) and build everything' \
+		'  run               Boot the built kernel+initrd under QEMU' \
+		'  busybox           Download BusyBox binary into cache' \
+		'  busybox-reinstall Redownload BusyBox (useful after clean-cache)' \
+		'  linux-extract     Extract Linux tarball into build/linux' \
+		'  linux-reinstall   Remove linux tar/dir and rebuild kernel from scratch' \
+		'  linux-rebuild     Rebuild kernel in existing linux source tree' \
 		'Variables:' \
 		'  INITRD  Initrd path' \
 		'  BZIMAGE Linux Kernel path' \
-		'  MEM     Memory count for QEMU'
+		'  MEM     Memory for QEMU (e.g., 512M)' \
+		'  JOBS    Parallel make jobs (default: nproc)' 
 
 .PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd wipe rebuild busybox busybox-reinstall linux-extract linux linux-reinstall linux-rebuild rootfs initrd initrd-rebuild
