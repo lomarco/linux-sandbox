@@ -83,11 +83,13 @@ $(ROOTFS): $(BUSYBOX) | $(BUILD_DIR)
 	if [ -d $(OVERLAYFS) ]; then \
 		cp -a $(OVERLAYFS)/. $@/; \
 	fi
-	touch $(ROOTFS_STAMP)
 
-rootfs: $(ROOTFS)
+$(ROOTFS_STAMP): $(ROOTFS)
+	touch $@
 
-$(INITRD): $(ROOTFS_STAMP) | $(BUILD_DIR) $(ROOTFS)
+rootfs: $(ROOTFS_STAMP)
+
+$(INITRD): $(ROOTFS_STAMP) | $(BUILD_DIR)
 	cd $(ROOTFS) && \
 		find . -print0 | LC_ALL=C sort -z | \
 		cpio --null -o --format=newc --owner=root:root | \
