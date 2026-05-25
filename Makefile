@@ -92,7 +92,7 @@ linux-reinstall: clean-linux-tar clean-linux-dir $(BZIMAGE)
 
 $(ROOTFS): $(BUSYBOX) | $(BUILD_DIR)
 	rm -rf $@
-	mkdir -p $@/{bin,etc,proc,sys,dev,tmp,mnt,root,run}
+	mkdir -p $@/{bin,etc,proc,sys,dev,tmp,mnt,root,run,lib/modules/$(LINUX_VERSION)}
 	$(BUSYBOX) --install $@/bin
 	ln -sf /bin/init $@/init
 	if [ -d $(OVERLAYFS) ]; then \
