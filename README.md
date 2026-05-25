@@ -1,7 +1,7 @@
 # Linux sandbox
 
 ## About
-Linux Sandbox is a minimal environment for experimenting with the Linux kernel and userspace. It provides fast, reproducible builds and boots QEMU with a customizable rootfs filesystem.
+Linux Sandbox is a minimal environment for experimenting with the Linux kernel and userspace. It provides fast, reproducible builds and boots QEMU with a minimal rootfs filesystem.
 
 ## Quick start
 To begin using Linux Sandbox, run:
