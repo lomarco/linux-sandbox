@@ -99,6 +99,7 @@ $(ROOTFS): $(BUSYBOX) $(BZIMAGE) | $(BUILD_DIR)
 		cp -a $(OVERLAYFS)/. $@/; \
 	fi
 	$(MAKE) -C $(LINUX_DIR) INSTALL_MOD_PATH=$@ INSTALL_MOD_STRIP=1 modules_install
+	depmod -a -b $@ $(LINUX_VERSION)
 
 $(ROOTFS_STAMP): $(ROOTFS)
 	touch $@
