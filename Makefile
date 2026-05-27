@@ -18,7 +18,6 @@ LINUX_URL     := https://www.kernel.org/pub/linux/kernel/v7.x/linux-$(LINUX_VERS
 LINUX_DIR    := $(BUILD_DIR)/linux
 LINUX_CONFIG := $(LINUX_DIR)/.config
 BZIMAGE      := $(LINUX_DIR)/arch/x86/boot/bzImage
-MODULES      := $(ROOTFS)/lib/modules/$(LINUX_VERSION)
 
 LINUX_STAMP  := $(BUILD_DIR)/.linux-stamp
 ROOTFS_STAMP := $(BUILD_DIR)/.rootfs-stamp
@@ -93,13 +92,13 @@ linux-reinstall: clean-linux-tar clean-linux-dir $(BZIMAGE)
 
 $(ROOTFS): $(BUSYBOX) $(BZIMAGE) | $(BUILD_DIR)
 	rm -rf $@
-	mkdir -p $@/{bin,etc,proc,sys,dev,tmp,mnt,root,run,lib/modules/$(LINUX_VERSION)}
+	mkdir -p $@/{bin,etc,proc,sys,dev,tmp,mnt,root,run}
 	$(BUSYBOX) --install $@/bin
 	ln -sf /bin/init $@/init
 	if [ -d $(OVERLAYFS) ]; then \
 		cp -a $(OVERLAYFS)/. $@/; \
 	fi
-	$(MAKE) -C $(LINUX_DIR) INSTALL_MOD_PATH=$(MODULES) INSTALL_MOD_STRIP=1 modules_install
+	$(MAKE) -C $(LINUX_DIR) INSTALL_MOD_PATH=$@ INSTALL_MOD_STRIP=1 modules_install
 
 $(ROOTFS_STAMP): $(ROOTFS)
 	touch $@
