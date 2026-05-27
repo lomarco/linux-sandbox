@@ -99,7 +99,7 @@ $(ROOTFS): $(BUSYBOX) $(BZIMAGE) | $(BUILD_DIR)
 	if [ -d $(OVERLAYFS) ]; then \
 		cp -a $(OVERLAYFS)/. $@/; \
 	fi
-	$(MAKE) -C $(LINUX_DIR) INSTALL_MOD_PATH=$(MODULES) modules_install
+	$(MAKE) -C $(LINUX_DIR) INSTALL_MOD_PATH=$(MODULES) INSTALL_MOD_STRIP=1 modules_install
 
 $(ROOTFS_STAMP): $(ROOTFS)
 	touch $@
