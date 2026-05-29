@@ -109,7 +109,7 @@ modules: $(MODULES_STAMP)
 $(MODULES_STAMP): $(LINUX_CONFIG) | $(BUILD_DIR)
 	$(MAKE) -C $(LINUX_DIR) modules_prepare
 	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
-	$(MAKE) -C $(LINUX_DIR) M=$(MODULES) modules
+	$(MAKE) -C $(LINUX_DIR) M=$(MODULES) modules -j$(JOBS)
 	touch $@
 
 modules-install: $(MODULES_STAMP) $(ROOTFS)
