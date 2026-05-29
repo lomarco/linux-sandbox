@@ -62,7 +62,7 @@ $(LINUX_DIR): $(LINUX_TARBALL) | $(BUILD_DIR)
 	tar -xJf $< -C $@ --strip-components=1
 
 $(LINUX_CONFIG): | $(LINUX_DIR)
-	$(MAKE) -C $(LINUX_DIR) tinyconfig
+	$(MAKE) -C $(LINUX_DIR) LLVM=$(LLVM) tinyconfig
 	$(LINUX_DIR)/scripts/config --file $(LINUX_CONFIG) \
 		--set-val ARCH x86_64 \
 		--enable CONFIG_64BIT \
@@ -78,10 +78,10 @@ $(LINUX_CONFIG): | $(LINUX_DIR)
 		--enable CONFIG_SERIAL_CORE \
 		--enable CONFIG_SERIAL_8250 \
 		--enable CONFIG_SERIAL_8250_CONSOLE
-	$(MAKE) -C $(LINUX_DIR) olddefconfig
+	$(MAKE) -C $(LINUX_DIR) LLVM=$(LLVM) olddefconfig
 
 $(BZIMAGE): $(LINUX_CONFIG) | $(LINUX_DIR)
-	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
+	$(MAKE) -C $(LINUX_DIR) LLVM=$(LLVM) -j$(JOBS)
 	touch $(LINUX_STAMP)
 
 linux: $(BZIMAGE)
@@ -173,6 +173,7 @@ help:
 		'  BZIMAGE          Linux Kernel path' \
 		'  MEM              Memory for QEMU (e.g., 512M)' \
 		'  JOBS             Parallel make jobs (default: nproc)' \
-		'  LINUX_VERSION    Version Linux kernel' 
+		'  LINUX_VERSION    Version Linux kernel' \
+		'  LLVM             Use llvm project instead default copiler'
 
 .PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd wipe rebuild busybox busybox-reinstall linux-extract linux linux-reinstall linux-rebuild rootfs initrd initrd-rebuild
