@@ -112,6 +112,15 @@ $(MODULES_STAMP): $(LINUX_CONFIG) | $(BUILD_DIR)
 	$(MAKE) -C $(LINUX_DIR) M=$(MODULES) modules
 	touch $@
 
+modules-install: $(MODULES_STAMP) $(ROOTFS)
+	$(MAKE) -C $(LINUX_DIR) INSTALL_MOD_PATH=$(ROOTFS) INSTALL_MOD_STRIP=1 modules_install
+	$(MAKE) -C $(LINUX_DIR) M=$(MODULES) \
+		INSTALL_MOD_PATH=$(ROOTFS) \
+		INSTALL_MOD_DIR=extra \
+		modules_install
+	depmod -a -b $(ROOTFS) $(KERNEL_RELEASE)
+	touch $(ROOTFS_STAMP)
+
 $(ROOTFS): $(BUSYBOX) $(BZIMAGE) | $(BUILD_DIR)
 	rm -rf $@
 	mkdir -p $@/{bin,etc,proc,sys,dev,tmp,mnt,root,run}
@@ -122,18 +131,9 @@ $(ROOTFS): $(BUSYBOX) $(BZIMAGE) | $(BUILD_DIR)
 	fi
 	touch $(ROOTFS)
 
-$(ROOTFS)/.modules-ready: $(MODULES_STAMP) | $(ROOTFS)
-	$(MAKE) -C $(LINUX_DIR) INSTALL_MOD_PATH=$(ROOTFS) INSTALL_MOD_STRIP=1 modules_install
-	$(MAKE) -C $(LINUX_DIR) M=$(MODULES) \
-		INSTALL_MOD_PATH=$(ROOTFS) \
-		INSTALL_MOD_DIR=extra \
-		modules_install
-	depmod -a -b $(ROOTFS) $(KERNEL_RELEASE)
-	touch $@
+rootfs: $(ROOTFS) modules-install
 
-rootfs: $(ROOTFS_STAMP)
-
-$(INITRD): $(ROOTFS_STAMP) | $(BUILD_DIR)
+$(INITRD): rootfs | $(BUILD_DIR)
 	cd $(ROOTFS) && \
 		find . -print0 | LC_ALL=C sort -z | \
 		cpio --null -o --format=newc --owner=root:root | \
@@ -222,4 +222,4 @@ help:
 		'    Kbuild           # obj-m += mod1.o' \
 		'    mod1.c'
 
-.PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd clean-modules wipe rebuild busybox busybox-reinstall linux-extract linux linux-reinstall linux-rebuild modules rootfs initrd initrd-rebuild
+.PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd clean-modules wipe rebuild busybox busybox-reinstall linux-extract linux linux-reinstall linux-rebuild modules modules-install rootfs initrd initrd-rebuild
