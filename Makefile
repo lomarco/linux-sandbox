@@ -100,7 +100,7 @@ linux-rebuild: clean-linux linux
 
 linux-reinstall: clean-linux-tar clean-linux-dir $(BZIMAGE)
 
-modules: $(LINUX_CONFIG) $(BZIMAGE) | $(ROOTFS)
+modules-install: $(LINUX_CONFIG) $(BZIMAGE) | $(ROOTFS)
 	$(MAKE) -C $(LINUX_DIR) modules_prepare
 	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
 	$(MAKE) -C $(LINUX_DIR) M=$(MODULES) modules -j$(JOBS)
@@ -111,8 +111,6 @@ modules: $(LINUX_CONFIG) $(BZIMAGE) | $(ROOTFS)
 		modules_install || true
 	depmod -a -b $(ROOTFS) $(LINUX_VERSION) || true
 	touch $(MODULES_STAMP)
-
-modules-install: modules
 
 $(ROOTFS): $(BUSYBOX) | $(BUILD_DIR)
 	rm -rf $@
@@ -216,4 +214,4 @@ help:
 		'    Kbuild           # obj-m += mod1.o' \
 		'    mod1.c'
 
-.PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd clean-modules wipe rebuild busybox busybox-reinstall linux-extract linux linux-reinstall linux-rebuild modules modules-install rootfs initrd initrd-rebuild
+.PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd clean-modules wipe rebuild busybox busybox-reinstall linux-extract linux linux-reinstall linux-rebuild modules-install rootfs initrd initrd-rebuild
