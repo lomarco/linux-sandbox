@@ -68,7 +68,7 @@ $(LINUX_EXTRACT_STAMP): $(LINUX_TARBALL) | $(BUILD_DIR)
 	touch $@
 
 $(LINUX_CONFIG): $(LINUX_EXTRACT_STAMP) | $(LINUX_DIR)
-	$(MAKE) -C $(LINUX_DIR) tinyconfig
+	$(MAKE) -C $(LINUX_DIR) LLVM=$(LLVM) tinyconfig
 	$(LINUX_DIR)/scripts/config --file $(LINUX_CONFIG) \
 		--set-val ARCH x86_64 \
 		--enable CONFIG_64BIT \
@@ -96,11 +96,11 @@ $(LINUX_CONFIG): $(LINUX_EXTRACT_STAMP) | $(LINUX_DIR)
 		--enable CONFIG_MODULE_COMPRESS_ALL \
 		--enable CONFIG_MODULE_DECOMPRESS \
 		--enable CONFIG_MODULES_TREE_LOOKUP
-	$(MAKE) -C $(LINUX_DIR) olddefconfig
+	$(MAKE) -C $(LINUX_DIR) LLVM=$(LLVM) olddefconfig
 	touch $@
 
 $(BZIMAGE): $(LINUX_CONFIG) | $(LINUX_DIR)
-	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
+	$(MAKE) -C $(LINUX_DIR) LLVM=$(LLVM) -j$(JOBS)
 	touch $(LINUX_STAMP)
 
 linux: $(BZIMAGE)
@@ -211,7 +211,8 @@ help:
 		'  MEM              Memory for QEMU (e.g., 512M)' \
 		'  JOBS             Parallel make jobs (default: nproc)' \
 		'  LINUX_VERSION    Version Linux kernel' \
-		'' \
+   	'  LLVM             Use llvm project instead default copiler' \
+    '' \
 		'Module structure:' \
 		'  modules/' \
 		'    Kbuild           # Main kbuild file: obj-m += mod1.o mod2.o' \
