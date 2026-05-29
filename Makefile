@@ -100,9 +100,7 @@ linux-rebuild: clean-linux linux
 
 linux-reinstall: clean-linux-tar clean-linux-dir $(BZIMAGE)
 
-modules: $(MODULES_STAMP)
-
-$(MODULES_STAMP): $(LINUX_CONFIG) $(BZIMAGE) | $(ROOTFS)
+modules: $(LINUX_CONFIG) $(BZIMAGE) | $(ROOTFS)
 	$(MAKE) -C $(LINUX_DIR) modules_prepare
 	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
 	$(MAKE) -C $(LINUX_DIR) M=$(MODULES) modules -j$(JOBS)
@@ -112,9 +110,9 @@ $(MODULES_STAMP): $(LINUX_CONFIG) $(BZIMAGE) | $(ROOTFS)
 		INSTALL_MOD_DIR=extra \
 		modules_install || true
 	depmod -a -b $(ROOTFS) $(LINUX_VERSION) || true
-	touch $@
+	touch $(MODULES_STAMP)
 
-modules-install: $(MODULES_STAMP)
+modules-install: modules
 
 $(ROOTFS): $(BUSYBOX) | $(BUILD_DIR)
 	rm -rf $@
@@ -126,7 +124,7 @@ $(ROOTFS): $(BUSYBOX) | $(BUILD_DIR)
 	fi
 	touch $(ROOTFS_STAMP)
 
-rootfs: $(ROOTFS)
+rootfs: $(ROOTFS) modules-install
 
 $(INITRD): rootfs | $(BUILD_DIR)
 	cd $(ROOTFS) && \
