@@ -152,7 +152,7 @@ clean-cache:
 	rm -rf $(CACHE_DIR)
 
 clean-linux:
-	$(MAKE) -C $(LINUX_DIR) clean
+	$(MAKE) -C $(LINUX_DIR) clean || true
 	rm -f $(LINUX_STAMP)
 
 clean-linux-dir:
