@@ -143,7 +143,7 @@ initrd-rebuild: clean-initrd rootfs initrd
 clean:
 	rm -rf $(BUILD_DIR)
 	rm -f $(LINUX_STAMP) $(ROOTFS_STAMP) $(MODULES_STAMP) \
-	       $(LINUX_EXTRACT_STAMP) $(LINUX_CONFIG)
+	       $(LINUX_EXTRACT_STAMP) $(LINUX_CONFIG_STAMP) $(LINUX_CONFIG)
 
 clean-cache:
 	rm -rf $(CACHE_DIR)
