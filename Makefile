@@ -211,4 +211,4 @@ help:
 		'  JOBS             Parallel make jobs (default: nproc)' \
 		'  LINUX_VERSION    Version Linux kernel' 
 
-.PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd wipe rebuild busybox busybox-reinstall linux-extract linux linux-reinstall linux-rebuild rootfs initrd initrd-rebuild
+.PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd clean-modules wipe rebuild busybox busybox-reinstall linux-extract linux linux-reinstall linux-rebuild modules rootfs initrd initrd-rebuild
