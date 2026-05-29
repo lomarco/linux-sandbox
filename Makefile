@@ -90,7 +90,7 @@ $(LINUX_CONFIG): $(LINUX_EXTRACT_STAMP) | $(LINUX_DIR)
 	$(MAKE) -C $(LINUX_DIR) olddefconfig
 	touch $@
 
-$(BZIMAGE): $(LINUX_CONFIG) $(MODULES_STAMP) | $(LINUX_DIR)
+$(BZIMAGE): $(LINUX_CONFIG) | $(LINUX_DIR)
 	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
 	touch $(LINUX_STAMP)
 
@@ -102,13 +102,13 @@ linux-reinstall: clean-linux-tar clean-linux-dir $(BZIMAGE)
 
 modules: $(MODULES_STAMP)
 
-$(MODULES_STAMP): $(LINUX_CONFIG) | $(BUILD_DIR)
+$(MODULES_STAMP): $(LINUX_CONFIG) $(BZIMAGE) | $(BUILD_DIR)
 	$(MAKE) -C $(LINUX_DIR) modules_prepare
 	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
 	$(MAKE) -C $(LINUX_DIR) M=$(MODULES) modules -j$(JOBS)
 	touch $@
 
-modules-install: $(MODULES_STAMP) $(ROOTFS)
+modules-install: $(MODULES_STAMP)
 	$(MAKE) -C $(LINUX_DIR) INSTALL_MOD_PATH=$(ROOTFS) INSTALL_MOD_STRIP=1 modules_install
 	$(MAKE) -C $(LINUX_DIR) M=$(MODULES) \
 		INSTALL_MOD_PATH=$(ROOTFS) \
@@ -117,7 +117,7 @@ modules-install: $(MODULES_STAMP) $(ROOTFS)
 	depmod -a -b $(ROOTFS) $(LINUX_VERSION)
 	touch $(ROOTFS_STAMP)
 
-$(ROOTFS): $(BUSYBOX) $(BZIMAGE) | $(BUILD_DIR)
+$(ROOTFS): $(BUSYBOX) | $(BUILD_DIR)
 	rm -rf $@
 	mkdir -p $@/{bin,etc,proc,sys,dev,tmp,mnt,root,run}
 	$(BUSYBOX) --install $@/bin
@@ -125,9 +125,9 @@ $(ROOTFS): $(BUSYBOX) $(BZIMAGE) | $(BUILD_DIR)
 	if [ -d $(OVERLAYFS) ]; then \
 		cp -a $(OVERLAYFS)/. $@/; \
 	fi
-	touch $@
+	touch $(ROOTFS_STAMP)
 
-rootfs: $(ROOTFS) modules-install
+rootfs: $(ROOTFS)
 
 $(INITRD): rootfs | $(BUILD_DIR)
 	cd $(ROOTFS) && \
