@@ -209,6 +209,17 @@ help:
 		'  BZIMAGE          Linux Kernel path' \
 		'  MEM              Memory for QEMU (e.g., 512M)' \
 		'  JOBS             Parallel make jobs (default: nproc)' \
-		'  LINUX_VERSION    Version Linux kernel' 
+		'  LINUX_VERSION    Version Linux kernel' \
+		'' \
+		'Module structure:' \
+		'  modules/' \
+		'    Kbuild           # Main kbuild file: obj-m += mod1.o mod2.o' \
+		'    mod1.c           # Module source' \
+		'    mod2.c           # Another module' \
+		'' \
+		'  Or per-module directories:' \
+		'  modules/mod1/' \
+		'    Kbuild           # obj-m += mod1.o' \
+		'    mod1.c'
 
 .PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd clean-modules wipe rebuild busybox busybox-reinstall linux-extract linux linux-reinstall linux-rebuild modules rootfs initrd initrd-rebuild
