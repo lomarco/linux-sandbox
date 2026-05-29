@@ -38,10 +38,6 @@ QEMU_OPTS := -m $(MEM) \
 
 JOBS ?= $(shell nproc)
 
-KERNEL_RELEASE := $(shell $(LINUX_DIR)/scripts/config --file $(LINUX_DIR)/.config \
-		--set-val CONFIG_LOCALVERSION "" && \
-		echo $(LINUX_VERSION) || echo $(LINUX_VERSION))
-
 all: linux modules rootfs initrd
 
 rebuild: clean all
@@ -118,7 +114,7 @@ modules-install: $(MODULES_STAMP) $(ROOTFS)
 		INSTALL_MOD_PATH=$(ROOTFS) \
 		INSTALL_MOD_DIR=extra \
 		modules_install
-	depmod -a -b $(ROOTFS) $(KERNEL_RELEASE)
+	depmod -a -b $(ROOTFS) $(LINUX_VERSION)
 	touch $(ROOTFS_STAMP)
 
 $(ROOTFS): $(BUSYBOX) $(BZIMAGE) | $(BUILD_DIR)
