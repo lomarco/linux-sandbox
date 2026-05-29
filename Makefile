@@ -35,7 +35,11 @@ QEMU_OPTS := -m $(MEM) \
 
 JOBS ?= $(shell nproc)
 
-all: linux rootfs initrd
+KERNEL_RELEASE := $(shell $(LINUX_DIR)/scripts/config --file $(LINUX_DIR)/.config \
+		--set-val CONFIG_LOCALVERSION "" && \
+		echo $(LINUX_VERSION) || echo $(LINUX_VERSION))
+
+all: linux modules rootfs initrd
 
 rebuild: clean all
 
