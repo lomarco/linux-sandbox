@@ -169,6 +169,10 @@ clean-initrd:
 	rm -rf $(ROOTFS)
 	rm -f $(INITRD) $(ROOTFS_STAMP)
 
+clean-modules:
+	$(MAKE) -C $(LINUX_DIR) M=$(MODULES) clean || true
+	rm -f $(MODULES_STAMP)
+
 wipe: clean clean-cache
 
 help:
