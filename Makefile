@@ -129,7 +129,7 @@ $(ROOTFS): $(BUSYBOX) $(BZIMAGE) | $(BUILD_DIR)
 	if [ -d $(OVERLAYFS) ]; then \
 		cp -a $(OVERLAYFS)/. $@/; \
 	fi
-	touch $(ROOTFS)
+	touch $@
 
 rootfs: $(ROOTFS) modules-install
 
@@ -138,6 +138,7 @@ $(INITRD): rootfs | $(BUILD_DIR)
 		find . -print0 | LC_ALL=C sort -z | \
 		cpio --null -o --format=newc --owner=root:root | \
 		gzip -9 -n > $@
+	touch $@
 
 initrd: $(INITRD)
 
