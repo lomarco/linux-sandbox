@@ -176,11 +176,12 @@ help:
 		'Usage: make [target]' \
 		'' \
 		'Targets:' \
-		'  all                  Build everything: linux, rootfs and initrd' \
+		'  all                  Build everything: linux, modules, rootfs and initrd' \
 		'  initrd               Build initrd image from current rootfs' \
 		'  initrd-rebuild       Clean and rebuild initrd (recreate rootfs then initrd)' \
-		'  rootfs               Prepare minimal root filesystem using BusyBox' \
+		'  rootfs               Prepare minimal root filesystem using BusyBox + modules' \
 		'  linux                Build Linux kernel (bzImage)' \
+		'  modules              Build all kernel modules from modules/' \
 		'  rebuild              Clean (all) and build everything' \
 		'  run                  Boot the built kernel+initrd under QEMU' \
 		'  busybox              Download BusyBox binary into cache' \
@@ -196,6 +197,7 @@ help:
 		'  clean-linux-tar    Remove downloaded linux tarball' \
 		'  clean-busybox      Remove cached BusyBox binary' \
 		'  clean-initrd       Remove generated rootfs and initrd artifacts' \
+		'  clean-modules      Clean built modules' \
 		'  wipe               Full cleanup: clean + clean-cache' \
 		'' \
 		'Variables:' \
