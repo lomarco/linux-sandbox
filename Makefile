@@ -102,20 +102,19 @@ linux-reinstall: clean-linux-tar clean-linux-dir $(BZIMAGE)
 
 modules: $(MODULES_STAMP)
 
-$(MODULES_STAMP): $(LINUX_CONFIG) $(BZIMAGE) | $(BUILD_DIR)
+$(MODULES_STAMP): $(LINUX_CONFIG) $(BZIMAGE) | $(ROOTFS)
 	$(MAKE) -C $(LINUX_DIR) modules_prepare
 	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
 	$(MAKE) -C $(LINUX_DIR) M=$(MODULES) modules -j$(JOBS)
-	touch $@
-
-modules-install: $(MODULES_STAMP)
 	$(MAKE) -C $(LINUX_DIR) INSTALL_MOD_PATH=$(ROOTFS) INSTALL_MOD_STRIP=1 modules_install
 	$(MAKE) -C $(LINUX_DIR) M=$(MODULES) \
 		INSTALL_MOD_PATH=$(ROOTFS) \
 		INSTALL_MOD_DIR=extra \
-		modules_install
-	depmod -a -b $(ROOTFS) $(LINUX_VERSION)
-	touch $(ROOTFS_STAMP)
+		modules_install || true
+	depmod -a -b $(ROOTFS) $(LINUX_VERSION) || true
+	touch $@
+
+modules-install: $(MODULES_STAMP)
 
 $(ROOTFS): $(BUSYBOX) | $(BUILD_DIR)
 	rm -rf $@
@@ -182,7 +181,7 @@ help:
 		'  initrd-rebuild       Clean and rebuild initrd (recreate rootfs then initrd)' \
 		'  rootfs               Prepare minimal root filesystem using BusyBox + modules' \
 		'  linux                Build Linux kernel (bzImage)' \
-		'  modules              Build all kernel modules from modules/' \
+		'  modules              Build and install kernel modules into rootfs' \
 		'  rebuild              Clean (all) and build everything' \
 		'  run                  Boot the built kernel+initrd under QEMU' \
 		'  busybox              Download BusyBox binary into cache' \
