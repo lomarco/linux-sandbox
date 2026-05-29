@@ -3,6 +3,7 @@
 BUILD_DIR  := $(abspath build)
 CACHE_DIR  := $(abspath cache)
 OVERLAYFS  := $(abspath overlayfs)
+MODULES    := $(abspath modules)
 
 LINUX_VERSION := 7.0.8
 
@@ -19,8 +20,12 @@ LINUX_DIR    := $(BUILD_DIR)/linux
 LINUX_CONFIG := $(LINUX_DIR)/.config
 BZIMAGE      := $(LINUX_DIR)/arch/x86/boot/bzImage
 
-LINUX_STAMP  := $(BUILD_DIR)/.linux-stamp
-ROOTFS_STAMP := $(BUILD_DIR)/.rootfs-stamp
+LINUX_STAMP         := $(BUILD_DIR)/.linux-stamp
+LINUX_EXTRACT_STAMP := $(BUILD_DIR)/.linux-extract-stamp
+LINUX_CONFIG_STAMP  := $(BUILD_DIR)/.linux-config-stamp
+MODULES_STAMP       := $(BUILD_DIR)/.modules-stamp
+ROOTFS_STAMP        := $(BUILD_DIR)/.rootfs-stamp
+INITRD_STAMP        := $(BUILD_DIR)/.initrd-stamp
 
 MEM := 28M
 QEMU := qemu-system-x86_64
@@ -33,7 +38,7 @@ QEMU_OPTS := -m $(MEM) \
 
 JOBS ?= $(shell nproc)
 
-all: linux rootfs initrd
+all: linux modules rootfs initrd
 
 rebuild: clean all
 
@@ -54,14 +59,15 @@ busybox-reinstall: clean-busybox $(BUSYBOX)
 $(LINUX_TARBALL): | $(CACHE_DIR)
 	curl -fSLo $@ $(LINUX_URL)
 
-linux-extract: $(LINUX_DIR)
+linux-extract: $(LINUX_EXTRACT_STAMP)
 
-$(LINUX_DIR): $(LINUX_TARBALL) | $(BUILD_DIR)
-	rm -rf $@
-	mkdir -p $@
-	tar -xJf $< -C $@ --strip-components=1
+$(LINUX_EXTRACT_STAMP): $(LINUX_TARBALL) | $(BUILD_DIR)
+	rm -rf $(LINUX_DIR)
+	mkdir -p $(LINUX_DIR)
+	tar -xJf $(LINUX_TARBALL) -C $(LINUX_DIR) --strip-components=1
+	touch $@
 
-$(LINUX_CONFIG): | $(LINUX_DIR)
+$(LINUX_CONFIG): $(LINUX_EXTRACT_STAMP) | $(LINUX_DIR)
 	$(MAKE) -C $(LINUX_DIR) LLVM=$(LLVM) tinyconfig
 	$(LINUX_DIR)/scripts/config --file $(LINUX_CONFIG) \
 		--set-val ARCH x86_64 \
@@ -77,8 +83,21 @@ $(LINUX_CONFIG): | $(LINUX_DIR)
 		--enable CONFIG_BINFMT_SCRIPT \
 		--enable CONFIG_SERIAL_CORE \
 		--enable CONFIG_SERIAL_8250 \
-		--enable CONFIG_SERIAL_8250_CONSOLE
+		--enable CONFIG_SERIAL_8250_CONSOLE \
+		--enable CONFIG_MODULES \
+		--enable CONFIG_MODULE_UNLOAD \
+		--enable CONFIG_MODULES_TREE_VERSION \
+		--enable CONFIG_MODULE_DEBUGFS \
+		--enable CONFIG_MODULE_FORCE_LOAD \
+		--enable CONFIG_MODULE_FORCE_UNLOAD \
+		--enable CONFIG_MODULE_COMPRESS_GZIP \
+		--enable CONFIG_MODULE_COMPRESS_XZ \
+		--enable CONFIG_MODULE_COMPRESS_ZSTD \
+		--enable CONFIG_MODULE_COMPRESS_ALL \
+		--enable CONFIG_MODULE_DECOMPRESS \
+		--enable CONFIG_MODULES_TREE_LOOKUP
 	$(MAKE) -C $(LINUX_DIR) LLVM=$(LLVM) olddefconfig
+	touch $@
 
 $(BZIMAGE): $(LINUX_CONFIG) | $(LINUX_DIR)
 	$(MAKE) -C $(LINUX_DIR) LLVM=$(LLVM) -j$(JOBS)
@@ -90,25 +109,36 @@ linux-rebuild: clean-linux linux
 
 linux-reinstall: clean-linux-tar clean-linux-dir $(BZIMAGE)
 
+modules-install: $(LINUX_CONFIG) $(BZIMAGE) | $(ROOTFS)
+	$(MAKE) -C $(LINUX_DIR) modules_prepare
+	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
+	$(MAKE) -C $(LINUX_DIR) M=$(MODULES) modules -j$(JOBS)
+	$(MAKE) -C $(LINUX_DIR) INSTALL_MOD_PATH=$(ROOTFS) INSTALL_MOD_STRIP=1 modules_install
+	$(MAKE) -C $(LINUX_DIR) M=$(MODULES) \
+		INSTALL_MOD_PATH=$(ROOTFS) \
+		INSTALL_MOD_DIR=extra \
+		modules_install || true
+	depmod -a -b $(ROOTFS) $(LINUX_VERSION) || true
+	touch $(MODULES_STAMP)
+
 $(ROOTFS): $(BUSYBOX) | $(BUILD_DIR)
 	rm -rf $@
-	mkdir -p $@/{bin,etc,proc,sys,dev,tmp,mnt,root,run,lib/modules/$(LINUX_VERSION)}
+	mkdir -p $@/{bin,etc,proc,sys,dev,tmp,mnt,root,run}
 	$(BUSYBOX) --install $@/bin
 	ln -sf /bin/init $@/init
 	if [ -d $(OVERLAYFS) ]; then \
 		cp -a $(OVERLAYFS)/. $@/; \
 	fi
+	touch $(ROOTFS_STAMP)
 
-$(ROOTFS_STAMP): $(ROOTFS)
-	touch $@
+rootfs: $(ROOTFS) modules-install
 
-rootfs: $(ROOTFS_STAMP)
-
-$(INITRD): $(ROOTFS_STAMP) | $(BUILD_DIR)
+$(INITRD): rootfs | $(BUILD_DIR)
 	cd $(ROOTFS) && \
 		find . -print0 | LC_ALL=C sort -z | \
 		cpio --null -o --format=newc --owner=root:root | \
 		gzip -9 -n > $@
+	touch $@
 
 initrd: $(INITRD)
 
@@ -116,18 +146,19 @@ initrd-rebuild: clean-initrd rootfs initrd
 
 clean:
 	rm -rf $(BUILD_DIR)
-	rm -f $(LINUX_STAMP) $(ROOTFS_STAMP)
+	rm -f $(LINUX_STAMP) $(ROOTFS_STAMP) $(MODULES_STAMP) \
+	       $(LINUX_EXTRACT_STAMP) $(LINUX_CONFIG_STAMP) $(LINUX_CONFIG)
 
 clean-cache:
 	rm -rf $(CACHE_DIR)
 
 clean-linux:
-	$(MAKE) -C $(LINUX_DIR) clean
+	$(MAKE) -C $(LINUX_DIR) clean || true
 	rm -f $(LINUX_STAMP)
 
 clean-linux-dir:
 	rm -rf $(LINUX_DIR)
-	rm -f $(LINUX_STAMP)
+	rm -f $(LINUX_STAMP) $(LINUX_EXTRACT_STAMP) $(LINUX_CONFIG)
 
 clean-linux-tar:
 	rm -f $(LINUX_TARBALL)
@@ -139,6 +170,10 @@ clean-initrd:
 	rm -rf $(ROOTFS)
 	rm -f $(INITRD) $(ROOTFS_STAMP)
 
+clean-modules:
+	$(MAKE) -C $(LINUX_DIR) M=$(MODULES) clean || true
+	rm -f $(MODULES_STAMP)
+
 wipe: clean clean-cache
 
 help:
@@ -146,11 +181,12 @@ help:
 		'Usage: make [target]' \
 		'' \
 		'Targets:' \
-		'  all                  Build everything: linux, rootfs and initrd' \
+		'  all                  Build everything: linux, modules, rootfs and initrd' \
 		'  initrd               Build initrd image from current rootfs' \
 		'  initrd-rebuild       Clean and rebuild initrd (recreate rootfs then initrd)' \
-		'  rootfs               Prepare minimal root filesystem using BusyBox' \
+		'  rootfs               Prepare minimal root filesystem using BusyBox + modules' \
 		'  linux                Build Linux kernel (bzImage)' \
+		'  modules              Build and install kernel modules into rootfs' \
 		'  rebuild              Clean (all) and build everything' \
 		'  run                  Boot the built kernel+initrd under QEMU' \
 		'  busybox              Download BusyBox binary into cache' \
@@ -166,6 +202,7 @@ help:
 		'  clean-linux-tar    Remove downloaded linux tarball' \
 		'  clean-busybox      Remove cached BusyBox binary' \
 		'  clean-initrd       Remove generated rootfs and initrd artifacts' \
+		'  clean-modules      Clean built modules' \
 		'  wipe               Full cleanup: clean + clean-cache' \
 		'' \
 		'Variables:' \
@@ -174,6 +211,17 @@ help:
 		'  MEM              Memory for QEMU (e.g., 512M)' \
 		'  JOBS             Parallel make jobs (default: nproc)' \
 		'  LINUX_VERSION    Version Linux kernel' \
-		'  LLVM             Use llvm project instead default copiler'
+   	'  LLVM             Use llvm project instead default copiler' \
+    '' \
+		'Module structure:' \
+		'  modules/' \
+		'    Kbuild           # Main kbuild file: obj-m += mod1.o mod2.o' \
+		'    mod1.c           # Module source' \
+		'    mod2.c           # Another module' \
+		'' \
+		'  Or per-module directories:' \
+		'  modules/mod1/' \
+		'    Kbuild           # obj-m += mod1.o' \
+		'    mod1.c'
 
-.PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd wipe rebuild busybox busybox-reinstall linux-extract linux linux-reinstall linux-rebuild rootfs initrd initrd-rebuild
+.PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd clean-modules wipe rebuild busybox busybox-reinstall linux-extract linux linux-reinstall linux-rebuild modules-install rootfs initrd initrd-rebuild
