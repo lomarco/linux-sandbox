@@ -90,6 +90,7 @@ $(LINUX_CONFIG): $(LINUX_EXTRACT_STAMP) | $(LINUX_DIR)
     --enable CONFIG_MODULE_UNLOAD \
 		--enable CONFIG_MODULES_TREE_VERSION
 	$(MAKE) -C $(LINUX_DIR) olddefconfig
+	touch $@
 
 $(BZIMAGE): $(LINUX_CONFIG) | $(LINUX_DIR)
 	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
