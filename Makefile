@@ -24,6 +24,8 @@ LINUX_STAMP   := $(BUILD_DIR)/.linux-stamp
 LINUX_EXTRACT_STAMP := $(BUILD_DIR)/.linux-extract-stamp
 LINUX_CONFIG_STAMP  := $(BUILD_DIR)/.linux-config-stamp
 MODULES_STAMP := $(BUILD_DIR)/.modules-stamp
+ROOTFS_STAMP  := $(BUILD_DIR)/.rootfs-stamp
+INITRD_STAMP  := $(BUILD_DIR)/.initrd-stamp
 
 MEM := 28M
 QEMU := qemu-system-x86_64
