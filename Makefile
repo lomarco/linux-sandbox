@@ -3,6 +3,7 @@
 BUILD_DIR  := $(abspath build)
 CACHE_DIR  := $(abspath cache)
 OVERLAYFS  := $(abspath overlayfs)
+MODULES    := $(abspath modules)
 
 LINUX_VERSION := 7.0.8
 
@@ -19,8 +20,9 @@ LINUX_DIR    := $(BUILD_DIR)/linux
 LINUX_CONFIG := $(LINUX_DIR)/.config
 BZIMAGE      := $(LINUX_DIR)/arch/x86/boot/bzImage
 
-LINUX_STAMP  := $(BUILD_DIR)/.linux-stamp
-ROOTFS_STAMP := $(BUILD_DIR)/.rootfs-stamp
+LINUX_STAMP   := $(BUILD_DIR)/.linux-stamp
+ROOTFS_STAMP  := $(BUILD_DIR)/.rootfs-stamp
+MODULES_STAMP := $(BUILD_DIR)/.modules-stamp
 
 MEM := 28M
 QEMU := qemu-system-x86_64
