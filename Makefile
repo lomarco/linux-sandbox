@@ -21,7 +21,8 @@ LINUX_CONFIG := $(LINUX_DIR)/.config
 BZIMAGE      := $(LINUX_DIR)/arch/x86/boot/bzImage
 
 LINUX_STAMP   := $(BUILD_DIR)/.linux-stamp
-ROOTFS_STAMP  := $(BUILD_DIR)/.rootfs-stamp
+LINUX_EXTRACT_STAMP := $(BUILD_DIR)/.linux-extract-stamp
+LINUX_CONFIG_STAMP  := $(BUILD_DIR)/.linux-config-stamp
 MODULES_STAMP := $(BUILD_DIR)/.modules-stamp
 
 MEM := 28M
@@ -60,14 +61,15 @@ busybox-reinstall: clean-busybox $(BUSYBOX)
 $(LINUX_TARBALL): | $(CACHE_DIR)
 	curl -fSLo $@ $(LINUX_URL)
 
-linux-extract: $(LINUX_DIR)
+linux-extract: $(LINUX_EXTRACT_STAMP)
 
-$(LINUX_DIR): $(LINUX_TARBALL) | $(BUILD_DIR)
-	rm -rf $@
-	mkdir -p $@
-	tar -xJf $< -C $@ --strip-components=1
+$(LINUX_EXTRACT_STAMP): $(LINUX_TARBALL) | $(BUILD_DIR)
+	rm -rf $(LINUX_DIR)
+	mkdir -p $(LINUX_DIR)
+	tar -xJf $(LINUX_TARBALL) -C $(LINUX_DIR) --strip-components=1
+	touch $@
 
-$(LINUX_CONFIG): | $(LINUX_DIR)
+$(LINUX_CONFIG): $(LINUX_EXTRACT_STAMP) | $(LINUX_DIR)
 	$(MAKE) -C $(LINUX_DIR) tinyconfig
 	$(LINUX_DIR)/scripts/config --file $(LINUX_CONFIG) \
 		--set-val ARCH x86_64 \
@@ -126,7 +128,8 @@ initrd-rebuild: clean-initrd rootfs initrd
 
 clean:
 	rm -rf $(BUILD_DIR)
-	rm -f $(LINUX_STAMP) $(ROOTFS_STAMP)
+	rm -f $(LINUX_STAMP) $(ROOTFS_STAMP) $(MODULES_STAMP) \
+	       $(LINUX_EXTRACT_STAMP) $(LINUX_CONFIG)
 
 clean-cache:
 	rm -rf $(CACHE_DIR)
@@ -137,7 +140,7 @@ clean-linux:
 
 clean-linux-dir:
 	rm -rf $(LINUX_DIR)
-	rm -f $(LINUX_STAMP)
+	rm -f $(LINUX_STAMP) $(LINUX_EXTRACT_STAMP) $(LINUX_CONFIG)
 
 clean-linux-tar:
 	rm -f $(LINUX_TARBALL)
