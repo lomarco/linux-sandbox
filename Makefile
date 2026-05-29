@@ -80,7 +80,8 @@ $(LINUX_CONFIG): | $(LINUX_DIR)
 		--enable CONFIG_SERIAL_CORE \
 		--enable CONFIG_SERIAL_8250 \
 		--enable CONFIG_SERIAL_8250_CONSOLE \
-		--enable CONFIG_MODULES
+		--enable CONFIG_MODULES \
+    --enable CONFIG_MODULE_UNLOAD \
 	$(MAKE) -C $(LINUX_DIR) olddefconfig
 
 $(BZIMAGE): $(LINUX_CONFIG) | $(LINUX_DIR)
