@@ -89,7 +89,7 @@ $(LINUX_CONFIG): $(LINUX_EXTRACT_STAMP) | $(LINUX_DIR)
 		--enable CONFIG_SERIAL_8250 \
 		--enable CONFIG_SERIAL_8250_CONSOLE \
 		--enable CONFIG_MODULES \
-    --enable CONFIG_MODULE_UNLOAD \
+		--enable CONFIG_MODULE_UNLOAD \
 		--enable CONFIG_MODULES_TREE_VERSION
 	$(MAKE) -C $(LINUX_DIR) olddefconfig
 	touch $@
