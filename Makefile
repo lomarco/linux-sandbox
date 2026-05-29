@@ -20,12 +20,12 @@ LINUX_DIR    := $(BUILD_DIR)/linux
 LINUX_CONFIG := $(LINUX_DIR)/.config
 BZIMAGE      := $(LINUX_DIR)/arch/x86/boot/bzImage
 
-LINUX_STAMP   := $(BUILD_DIR)/.linux-stamp
+LINUX_STAMP         := $(BUILD_DIR)/.linux-stamp
 LINUX_EXTRACT_STAMP := $(BUILD_DIR)/.linux-extract-stamp
 LINUX_CONFIG_STAMP  := $(BUILD_DIR)/.linux-config-stamp
-MODULES_STAMP := $(BUILD_DIR)/.modules-stamp
-ROOTFS_STAMP  := $(BUILD_DIR)/.rootfs-stamp
-INITRD_STAMP  := $(BUILD_DIR)/.initrd-stamp
+MODULES_STAMP       := $(BUILD_DIR)/.modules-stamp
+ROOTFS_STAMP        := $(BUILD_DIR)/.rootfs-stamp
+INITRD_STAMP        := $(BUILD_DIR)/.initrd-stamp
 
 MEM := 28M
 QEMU := qemu-system-x86_64
