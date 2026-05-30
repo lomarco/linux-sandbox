@@ -38,10 +38,13 @@ QEMU_OPTS := -m $(MEM) \
 JOBS ?= $(shell nproc)
 LLVM ?=
 
+.PHONY += all
 all: linux modules rootfs initrd
 
+.PHONY += rebuild
 rebuild: clean all
 
+.PHONY += run
 run:
 	$(QEMU) $(QEMU_OPTS)
 
@@ -52,10 +55,13 @@ $(BUSYBOX): | $(CACHE_DIR)
 	curl -fSLo $@ $(BUSYBOX_URL)
 	chmod +x $@
 
+.PHONY += busybox
 busybox: $(BUSYBOX)
 
+.PHONY += busybox-reinstall
 busybox-reinstall: clean-busybox $(BUSYBOX)
 
+.PHONY += linux-extract
 linux-extract: $(LINUX_CLONE_STAMP)
 
 $(LINUX_CLONE_STAMP): | $(BUILD_DIR)
@@ -99,15 +105,20 @@ $(BZIMAGE): $(LINUX_CONFIG) | $(LINUX_DIR)
 	$(MAKE) -C $(LINUX_DIR) LLVM=$(LLVM) -j$(JOBS)
 	touch $(LINUX_BUILD_STAMP)
 
+.PHONY += linux
 linux: $(BZIMAGE)
 
+.PHONY += linux-rebuild
 linux-rebuild: clean-linux linux
 
+.PHONY += linux-reinstall
 linux-reinstall: clean-linux-dir $(BZIMAGE)
 
+.PHONY += linux-update
 linux-update: $(LINUX_CLONE_STAMP)
 	cd $(LINUX_DIR) && git pull --rebase
 
+.PHONY += modules-install
 modules-install: $(LINUX_CONFIG) $(BZIMAGE) | $(ROOTFS)
 	$(MAKE) -C $(LINUX_DIR) modules_prepare
 	$(MAKE) -C $(LINUX_DIR) -j$(JOBS)
@@ -130,6 +141,7 @@ $(ROOTFS): $(BUSYBOX) | $(BUILD_DIR)
 	fi
 	touch $(ROOTFS_STAMP)
 
+.PHONY += rootfs
 rootfs: $(ROOTFS) modules-install
 
 $(INITRD): rootfs | $(BUILD_DIR)
@@ -139,39 +151,50 @@ $(INITRD): rootfs | $(BUILD_DIR)
 		gzip -9 -n > $@
 	touch $(INITRD_STAMP)
 
+.PHONY += initrd
 initrd: $(INITRD)
 
+.PHONY += initrd-rebuild
 initrd-rebuild: clean-initrd rootfs initrd
 
+.PHONY += clean
 clean:
 	rm -rf $(BUILD_DIR)
 	rm -f $(LINUX_BUILD_STAMP) $(ROOTFS_STAMP) $(MODULES_STAMP) \
 	       $(LINUX_CLONE_STAMP) $(LINUX_CONFIG_STAMP) $(LINUX_CONFIG)
 
+.PHONY += clean-cache
 clean-cache:
 	rm -rf $(CACHE_DIR)
 
+.PHONY += clean-linux
 clean-linux:
 	$(MAKE) -C $(LINUX_DIR) clean || true
 	rm -f $(LINUX_BUILD_STAMP)
 
+.PHONY += clean-linux-dir
 clean-linux-dir:
 	rm -rf $(LINUX_DIR)
 	rm -f $(LINUX_CLONE_STAMP) $(LINUX_CONFIG_STAMP) $(LINUX_CONFIG) $(LINUX_BUILD_STAMP)
 
+.PHONY += clean-busybox
 clean-busybox:
 	rm -f $(BUSYBOX)
 
+.PHONY += clean-initrd
 clean-initrd:
 	rm -rf $(ROOTFS)
 	rm -f $(INITRD) $(ROOTFS_STAMP) $(INITRD_STAMP)
 
+.PHONY += clean-modules
 clean-modules:
 	$(MAKE) -C $(LINUX_DIR) M=$(MODULES) clean || true
 	rm -f $(MODULES_STAMP)
 
+.PHONY += wipe
 wipe: clean clean-cache
 
+.PHONY += help
 help:
 	@printf '%s\n' \
 		'Usage: make [target]' \
@@ -221,5 +244,3 @@ help:
 		'  modules/mod1/' \
 		'    Kbuild           # obj-m += mod1.o' \
 		'    mod1.c'
-
-.PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-busybox clean-initrd clean-modules wipe rebuild busybox busybox-reinstall linux-extract linux linux-reinstall linux-rebuild linux-update modules-install rootfs initrd initrd-rebuild
