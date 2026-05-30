@@ -36,6 +36,7 @@ QEMU_OPTS := -m $(MEM) \
 						 -serial mon:stdio
 
 JOBS ?= $(shell nproc)
+LLVM ?=
 
 all: linux modules rootfs initrd
 
