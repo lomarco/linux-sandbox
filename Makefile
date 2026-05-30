@@ -6,6 +6,8 @@ OVERLAYFS  := $(abspath overlayfs)
 MODULES    := $(abspath modules)
 
 LINUX_VERSION := 7.0.8
+LINUX_REPO    := https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
+LINUX_TAG     := v$(LINUX_VERSION)
 
 ROOTFS := $(BUILD_DIR)/rootfs
 INITRD := $(BUILD_DIR)/initrd.img
@@ -13,16 +15,13 @@ INITRD := $(BUILD_DIR)/initrd.img
 BUSYBOX     := $(CACHE_DIR)/busybox
 BUSYBOX_URL := https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox
 
-LINUX_TARBALL := $(CACHE_DIR)/linux.tar.xz
-LINUX_URL     := https://www.kernel.org/pub/linux/kernel/v7.x/linux-$(LINUX_VERSION).tar.xz
-
 LINUX_DIR    := $(BUILD_DIR)/linux
 LINUX_CONFIG := $(LINUX_DIR)/.config
 BZIMAGE      := $(LINUX_DIR)/arch/x86/boot/bzImage
 
-LINUX_STAMP         := $(BUILD_DIR)/.linux-stamp
-LINUX_EXTRACT_STAMP := $(BUILD_DIR)/.linux-extract-stamp
+LINUX_CLONE_STAMP   := $(BUILD_DIR)/.linux-clone-stamp
 LINUX_CONFIG_STAMP  := $(BUILD_DIR)/.linux-config-stamp
+LINUX_BUILD_STAMP   := $(BUILD_DIR)/.linux-build-stamp
 MODULES_STAMP       := $(BUILD_DIR)/.modules-stamp
 ROOTFS_STAMP        := $(BUILD_DIR)/.rootfs-stamp
 INITRD_STAMP        := $(BUILD_DIR)/.initrd-stamp
@@ -56,18 +55,14 @@ busybox: $(BUSYBOX)
 
 busybox-reinstall: clean-busybox $(BUSYBOX)
 
-$(LINUX_TARBALL): | $(CACHE_DIR)
-	curl -fSLo $@ $(LINUX_URL)
+linux-extract: $(LINUX_CLONE_STAMP)
 
-linux-extract: $(LINUX_EXTRACT_STAMP)
-
-$(LINUX_EXTRACT_STAMP): $(LINUX_TARBALL) | $(BUILD_DIR)
+$(LINUX_CLONE_STAMP): | $(BUILD_DIR)
 	rm -rf $(LINUX_DIR)
-	mkdir -p $(LINUX_DIR)
-	tar -xJf $(LINUX_TARBALL) -C $(LINUX_DIR) --strip-components=1
+	git clone --depth 1 --branch $(LINUX_TAG) $(LINUX_REPO) $(LINUX_DIR)
 	touch $@
 
-$(LINUX_CONFIG): $(LINUX_EXTRACT_STAMP) | $(LINUX_DIR)
+$(LINUX_CONFIG): $(LINUX_CLONE_STAMP) | $(LINUX_DIR)
 	$(MAKE) -C $(LINUX_DIR) LLVM=$(LLVM) tinyconfig
 	$(LINUX_DIR)/scripts/config --file $(LINUX_CONFIG) \
 		--set-val ARCH x86_64 \
@@ -101,13 +96,16 @@ $(LINUX_CONFIG): $(LINUX_EXTRACT_STAMP) | $(LINUX_DIR)
 
 $(BZIMAGE): $(LINUX_CONFIG) | $(LINUX_DIR)
 	$(MAKE) -C $(LINUX_DIR) LLVM=$(LLVM) -j$(JOBS)
-	touch $(LINUX_STAMP)
+	touch $(LINUX_BUILD_STAMP)
 
 linux: $(BZIMAGE)
 
 linux-rebuild: clean-linux linux
 
-linux-reinstall: clean-linux-tar clean-linux-dir $(BZIMAGE)
+linux-reinstall: clean-linux-dir $(BZIMAGE)
+
+linux-update: $(LINUX_CLONE_STAMP)
+	cd $(LINUX_DIR) && git pull --rebase
 
 modules-install: $(LINUX_CONFIG) $(BZIMAGE) | $(ROOTFS)
 	$(MAKE) -C $(LINUX_DIR) modules_prepare
@@ -138,7 +136,7 @@ $(INITRD): rootfs | $(BUILD_DIR)
 		find . -print0 | LC_ALL=C sort -z | \
 		cpio --null -o --format=newc --owner=root:root | \
 		gzip -9 -n > $@
-	touch $@
+	touch $(INITRD_STAMP)
 
 initrd: $(INITRD)
 
@@ -146,29 +144,26 @@ initrd-rebuild: clean-initrd rootfs initrd
 
 clean:
 	rm -rf $(BUILD_DIR)
-	rm -f $(LINUX_STAMP) $(ROOTFS_STAMP) $(MODULES_STAMP) \
-	       $(LINUX_EXTRACT_STAMP) $(LINUX_CONFIG_STAMP) $(LINUX_CONFIG)
+	rm -f $(LINUX_BUILD_STAMP) $(ROOTFS_STAMP) $(MODULES_STAMP) \
+	       $(LINUX_CLONE_STAMP) $(LINUX_CONFIG_STAMP) $(LINUX_CONFIG)
 
 clean-cache:
 	rm -rf $(CACHE_DIR)
 
 clean-linux:
 	$(MAKE) -C $(LINUX_DIR) clean || true
-	rm -f $(LINUX_STAMP)
+	rm -f $(LINUX_BUILD_STAMP)
 
 clean-linux-dir:
 	rm -rf $(LINUX_DIR)
-	rm -f $(LINUX_STAMP) $(LINUX_EXTRACT_STAMP) $(LINUX_CONFIG)
-
-clean-linux-tar:
-	rm -f $(LINUX_TARBALL)
+	rm -f $(LINUX_CLONE_STAMP) $(LINUX_CONFIG_STAMP) $(LINUX_CONFIG) $(LINUX_BUILD_STAMP)
 
 clean-busybox:
 	rm -f $(BUSYBOX)
 
 clean-initrd:
 	rm -rf $(ROOTFS)
-	rm -f $(INITRD) $(ROOTFS_STAMP)
+	rm -f $(INITRD) $(ROOTFS_STAMP) $(INITRD_STAMP)
 
 clean-modules:
 	$(MAKE) -C $(LINUX_DIR) M=$(MODULES) clean || true
@@ -191,15 +186,15 @@ help:
 		'  run                  Boot the built kernel+initrd under QEMU' \
 		'  busybox              Download BusyBox binary into cache' \
 		'  busybox-reinstall    Redownload BusyBox (useful after clean-cache)' \
-		'  linux-extract        Extract Linux tarball into build/linux' \
-		'  linux-reinstall      Remove linux tar/dir and rebuild kernel from scratch' \
+		'  linux-extract        Clone Linux repo via git into build/linux' \
+		'  linux-update         Pull latest changes in existing git clone' \
+		'  linux-reinstall      Remove linux dir and rebuild kernel from scratch' \
 		'  linux-rebuild        Rebuild kernel in existing linux source tree' \
 		'' \
 		'  clean              Remove build artifacts (build dir and stamps)' \
 		'  clean-cache        Remove cached downloads' \
 		'  clean-linux        Run make clean inside linux tree and remove stamp' \
 		'  clean-linux-dir    Remove extracted linux source directory' \
-		'  clean-linux-tar    Remove downloaded linux tarball' \
 		'  clean-busybox      Remove cached BusyBox binary' \
 		'  clean-initrd       Remove generated rootfs and initrd artifacts' \
 		'  clean-modules      Clean built modules' \
@@ -211,8 +206,10 @@ help:
 		'  MEM              Memory for QEMU (e.g., 512M)' \
 		'  JOBS             Parallel make jobs (default: nproc)' \
 		'  LINUX_VERSION    Version Linux kernel' \
-   	'  LLVM             Use llvm project instead default copiler' \
-    '' \
+		'  LINUX_REPO       Git repo URL for Linux kernel' \
+		'  LINUX_TAG        Git tag/branch for Linux kernel' \
+		'  LLVM             Use llvm project instead default compiler' \
+		'' \
 		'Module structure:' \
 		'  modules/' \
 		'    Kbuild           # Main kbuild file: obj-m += mod1.o mod2.o' \
@@ -224,4 +221,4 @@ help:
 		'    Kbuild           # obj-m += mod1.o' \
 		'    mod1.c'
 
-.PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-linux-tar clean-busybox clean-initrd clean-modules wipe rebuild busybox busybox-reinstall linux-extract linux linux-reinstall linux-rebuild modules-install rootfs initrd initrd-rebuild
+.PHONY: all run help clean clean-cache clean-linux clean-linux-dir clean-busybox clean-initrd clean-modules wipe rebuild busybox busybox-reinstall linux-extract linux linux-reinstall linux-rebuild linux-update modules-install rootfs initrd initrd-rebuild
