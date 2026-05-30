@@ -42,3 +42,4 @@ The rest you can look at `make help`.
 - python3 >=3.6
 - pkg-config >=0.29
 - qemu-system-x86_64 >=6.0
+- git >=2.20
